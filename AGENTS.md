@@ -10,6 +10,7 @@ TanStack Start frontend + Hono API backend on Cloudflare Workers.
 | API | Hono on Cloudflare Workers |
 | Runtime | Cloudflare Workers |
 | Styling | Tailwind CSS v4, Shadcn (new-york, Zinc, CSS vars) |
+| Smart contracts | Solidity (Foundry + soldeer) |
 | Language | TypeScript (strict) |
 | Linter | Biome |
 | Package manager | pnpm |
@@ -24,6 +25,9 @@ TanStack Start frontend + Hono API backend on Cloudflare Workers.
 - `src/hono/` — Hono API routes and factory
 - `src/server.ts` — custom CF Workers entry (routes `/api/*` → Hono, rest → TanStack)
 - `src/integrations/tanstack-query/` — query client setup and providers
+- `contracts/src/` — Solidity source (Foundry)
+- `contracts/test/` — Forge tests
+- `contracts/dependencies/` — soldeer-managed deps (gitignored)
 - Path alias: `@/*` → `src/*`
 
 ## Commands
@@ -56,6 +60,10 @@ pnpm db:seed:dev          # seed sample data (dev)
 pnpm db:seed:staging      # seed sample data (staging)
 pnpm db:seed:production   # seed sample data (production)
 pnpm db:studio            # Drizzle Studio (dev)
+
+# Contracts (Foundry)
+pnpm contracts:build      # forge build
+pnpm contracts:test       # forge test
 ```
 
 ## Architecture

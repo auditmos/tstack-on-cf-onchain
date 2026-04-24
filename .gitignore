@@ -20,3 +20,8 @@ count.txt
 .staging.vars
 .production.vars
 .wrangler/
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/dependencies/

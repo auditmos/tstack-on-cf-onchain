@@ -35,7 +35,9 @@
 		"db:studio": "dotenvx run -f .dev.vars -- drizzle-kit studio --config drizzle-dev.config.ts",
 		"db:seed:dev": "dotenvx run -f .dev.vars -- tsx scripts/seed.ts",
 		"db:seed:staging": "dotenvx run -f .staging.vars -- tsx scripts/seed.ts",
-		"db:seed:production": "dotenvx run -f .production.vars -- tsx scripts/seed.ts"
+		"db:seed:production": "dotenvx run -f .production.vars -- tsx scripts/seed.ts",
+		"contracts:build": "forge build --root contracts",
+		"contracts:test": "forge test --root contracts"
 	},
 	"dependencies": {
 		"@neondatabase/serverless": "^1.0.2",
