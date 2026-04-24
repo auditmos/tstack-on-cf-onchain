@@ -1,3 +1,10 @@
+# 1.0.0 (2026-04-24)
+
+
+### Features
+
+* add Foundry scaffold with soldeer and Counter.sol ([43240c4](https://github.com/auditmos/tstack-on-cf-onchain/commit/43240c480f73a083343ef249b461698ef7f8d930)), closes [#2](https://github.com/auditmos/tstack-on-cf-onchain/issues/2)
+
 # [1.1.0](https://github.com/auditmos/tstack-on-cf/compare/v1.0.0...v1.1.0) (2026-04-09)
 
 
