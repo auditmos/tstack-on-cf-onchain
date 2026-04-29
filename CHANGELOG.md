@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.1.0...v1.2.0) (2026-04-29)
+
+
+### Features
+
+* **contracts:** deploy scripts + deployment registry ([18aacfe](https://github.com/auditmos/tstack-on-cf-onchain/commit/18aacfed9b6b2a74eb4e0e102f53bc542331f089)), closes [#4](https://github.com/auditmos/tstack-on-cf-onchain/issues/4)
+
 # [1.1.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.0.0...v1.1.0) (2026-04-29)
 
 
