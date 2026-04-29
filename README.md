@@ -55,6 +55,9 @@ The app runs on http://localhost:3000. API endpoints are served under `/api/*`.
 | `pnpm db:seed:{dev,staging,production}` | Run `scripts/seed.ts` against each env |
 | `pnpm deps` / `pnpm deps:update` | Check / apply dependency updates via taze |
 | `pnpm release` | semantic-release |
+| `pnpm contracts:build` / `pnpm contracts:test` | `forge build` / `forge test` |
+| `pnpm contracts:typegen` | Generate `as const` ABI + typed addresses into `src/contracts/` |
+| `pnpm contracts:deploy:{local,testnet,mainnet}` | Run `DeployCounter.s.sol` against the matching `[rpc_endpoints]` profile |
 
 All `db:*` scripts load secrets via `@dotenvx/dotenvx` from `.dev.vars`, `.staging.vars`, or `.production.vars`.
 
@@ -228,6 +231,56 @@ pnpm db:studio
 ```
 
 Per-env configs (`drizzle-dev.config.ts`, `drizzle-staging.config.ts`, `drizzle-production.config.ts`) all point at `src/db/schema.ts` but write migrations to separate directories, allowing independent migration tracking per environment.
+
+## Smart Contracts (Foundry)
+
+The `contracts/` folder is a self-contained Foundry project. Soldeer manages dependencies (OpenZeppelin, forge-std), `pnpm contracts:typegen` generates `as const` ABIs + typed addresses into `src/contracts/`, and Solidity deploy scripts in `contracts/script/` write deployed addresses to `contracts/deployments/{chainId}.json`.
+
+```
+contracts/
+├── foundry.toml           # profile, fs_permissions, [rpc_endpoints]
+├── remappings.txt         # forge-std/, @openzeppelin/contracts/
+├── src/Counter.sol        # example contract
+├── test/Counter.t.sol     # forge test
+├── script/
+│   ├── DeploymentRegistry.sol  # library: read/merge/write registry JSON
+│   └── DeployCounter.s.sol     # forge script
+└── deployments/{chainId}.json  # auto-written registry, format: {"Counter":"0x.."}
+```
+
+### Deploy
+
+RPC endpoints come from `[rpc_endpoints]` in `foundry.toml`:
+
+```toml
+[rpc_endpoints]
+local = "http://127.0.0.1:8545"
+testnet = "${TESTNET_RPC_URL}"
+mainnet = "${MAINNET_RPC_URL}"
+```
+
+Set `TESTNET_RPC_URL` / `MAINNET_RPC_URL` in your shell or `.dev.vars` before deploying. The `local` profile points at anvil and is the smoke-test path.
+
+```bash
+# Local smoke test (anvil must be running on :8545)
+anvil --silent &
+pnpm contracts:deploy:local
+# → contracts/deployments/31337.json now contains {"Counter":"0x.."}
+
+# Testnet / mainnet — supply your signer
+TESTNET_RPC_URL=https://... pnpm contracts:deploy:testnet --private-key $DEPLOYER_PRIVATE_KEY
+MAINNET_RPC_URL=https://... pnpm contracts:deploy:mainnet --private-key $DEPLOYER_PRIVATE_KEY
+```
+
+Any flags after the script name (`--private-key`, `--account <keystore>`, `--ledger`, `--verify`, …) are forwarded to `forge script`. The local script bakes in anvil's well-known dev key — never use it on a real chain.
+
+The deploy script delegates to `DeploymentRegistry.record(path, name, address)`, which:
+- reads `contracts/deployments/{chainId}.json` if it exists,
+- preserves entries for other contracts,
+- overwrites the entry for the redeployed contract,
+- creates the parent directory if missing.
+
+Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.ts` with the new addresses.
 
 ## REST API with Hono
 

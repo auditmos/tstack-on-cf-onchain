@@ -25,6 +25,8 @@ count.txt
 contracts/out/
 contracts/cache/
 contracts/dependencies/
+contracts/test/tmp/
+contracts/broadcast/
 
 # Generated contract bindings (regenerate via `pnpm contracts:typegen`)
 src/contracts/abis/
