@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.0.0...v1.1.0) (2026-04-29)
+
+
+### Features
+
+* **contracts:** ABI typegen pipeline ([2cb4f53](https://github.com/auditmos/tstack-on-cf-onchain/commit/2cb4f538b09c024f089ebfc2628ae286efdc0b4b))
+
 # 1.0.0 (2026-04-24)
 
 
