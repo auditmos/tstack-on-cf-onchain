@@ -6,11 +6,13 @@ import { apiHono } from "@/hono/api";
 
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		initDatabase({
-			host: env.DATABASE_HOST,
-			username: env.DATABASE_USERNAME,
-			password: env.DATABASE_PASSWORD,
-		});
+		if (env.DATABASE_HOST) {
+			initDatabase({
+				host: env.DATABASE_HOST,
+				username: env.DATABASE_USERNAME,
+				password: env.DATABASE_PASSWORD,
+			});
+		}
 
 		const url = new URL(request.url);
 

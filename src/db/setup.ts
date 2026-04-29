@@ -17,6 +17,10 @@ export function initDatabase(config: DbConfig) {
 }
 
 export function getDb() {
-	if (!db) throw new Error("Database not initialized. Call initDatabase() first.");
+	if (!db) {
+		throw new Error(
+			"Database not initialized — set DATABASE_HOST in .dev.vars (or via Cloudflare secrets in deployed envs).",
+		);
+	}
 	return db;
 }

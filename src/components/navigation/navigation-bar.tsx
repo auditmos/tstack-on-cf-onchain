@@ -11,6 +11,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet";
+import { ConnectButton } from "@/components/web3/connect-button";
 import { cn } from "@/lib/utils";
 
 interface NavigationItem {
@@ -119,8 +120,9 @@ export function NavigationBar() {
 						))}
 
 						{/* Theme Toggle */}
-						<div className="ml-2 pl-2 border-l border-border/30">
+						<div className="ml-2 pl-2 border-l border-border/30 flex items-center gap-2">
 							<ThemeToggle variant="ghost" align="end" />
+							<ConnectButton />
 						</div>
 					</div>
 
@@ -129,6 +131,7 @@ export function NavigationBar() {
 
 					{/* Mobile Menu Button + Theme Toggle */}
 					<div className="lg:hidden flex items-center space-x-2">
+						<ConnectButton />
 						<ThemeToggle variant="ghost" align="end" />
 						<Sheet open={isOpen} onOpenChange={setIsOpen}>
 							<SheetTrigger asChild>
