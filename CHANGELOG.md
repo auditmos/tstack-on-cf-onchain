@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.3.0...v1.4.0) (2026-04-29)
+
+
+### Features
+
+* **web3:** wagmi + ConnectKit integration (issue [#6](https://github.com/auditmos/tstack-on-cf-onchain/issues/6)) ([13f5c7c](https://github.com/auditmos/tstack-on-cf-onchain/commit/13f5c7c2298ec17b4ad4d72ca072ebe097248e39))
+
 # [1.3.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.2.0...v1.3.0) (2026-04-29)
 
 
