@@ -25,3 +25,7 @@ count.txt
 contracts/out/
 contracts/cache/
 contracts/dependencies/
+
+# Generated contract bindings (regenerate via `pnpm contracts:typegen`)
+src/contracts/abis/
+src/contracts/addresses.ts
