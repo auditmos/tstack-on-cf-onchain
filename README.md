@@ -31,9 +31,14 @@ pnpm db:migrate:dev
 
 # Start the dev server
 pnpm dev
+
+# (Optional, in another terminal) start the local chain — anvil + deploy + ABI typegen
+pnpm contracts:dev
 ```
 
 The app runs on http://localhost:3000. API endpoints are served under `/api/*`.
+
+`pnpm contracts:dev` boots anvil on `:8545`, waits for it to be ready, deploys `Counter.sol`, regenerates `src/contracts/`, and keeps anvil in the foreground. Ctrl+C stops it cleanly. Requires [Foundry](https://book.getfoundry.sh/) (`anvil`, `forge`) on your PATH.
 
 ## Scripts
 
@@ -58,6 +63,7 @@ The app runs on http://localhost:3000. API endpoints are served under `/api/*`.
 | `pnpm contracts:build` / `pnpm contracts:test` | `forge build` / `forge test` |
 | `pnpm contracts:typegen` | Generate `as const` ABI + typed addresses into `src/contracts/` |
 | `pnpm contracts:deploy:{local,testnet,mainnet}` | Run `DeployCounter.s.sol` against the matching `[rpc_endpoints]` profile |
+| `pnpm contracts:dev` | Start anvil on `:8545`, deploy contracts, run typegen, keep anvil in the foreground |
 
 All `db:*` scripts load secrets via `@dotenvx/dotenvx` from `.dev.vars`, `.staging.vars`, or `.production.vars`.
 
