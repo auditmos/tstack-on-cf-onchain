@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.2.0...v1.3.0) (2026-04-29)
+
+
+### Features
+
+* **contracts:** local dev orchestrator (anvil + deploy + typegen) ([677792d](https://github.com/auditmos/tstack-on-cf-onchain/commit/677792d4ff2122a19611e1be362189fb53459dbe)), closes [#5](https://github.com/auditmos/tstack-on-cf-onchain/issues/5)
+
 # [1.2.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.1.0...v1.2.0) (2026-04-29)
 
 
