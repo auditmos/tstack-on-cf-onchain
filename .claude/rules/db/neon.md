@@ -1,8 +1,3 @@
----
-paths:
-  - "src/db/**/*.ts"
----
-
 # Neon Database Rules
 
 ## Connection Setup

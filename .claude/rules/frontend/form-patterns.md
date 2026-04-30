@@ -1,8 +1,3 @@
----
-paths:
-  - "src/components/**/*.{ts,tsx}"
----
-
 # Form Patterns (TanStack Form + React Query)
 
 Never use raw `useState` for form state. Always use `useForm` + `form.Field` + `form.Subscribe`.

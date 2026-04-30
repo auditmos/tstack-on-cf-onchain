@@ -1,8 +1,3 @@
----
-paths:
-  - "src/db/**/*.ts"
----
-
 # Zod Rules
 
 ## Schema Definition

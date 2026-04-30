@@ -1,8 +1,3 @@
----
-paths:
-  - "src/**/*.{ts,tsx}"
----
-
 # TanStack Rules (Start, Router, Query, Form)
 
 ## TanStack Start - Server Functions

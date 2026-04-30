@@ -1,8 +1,3 @@
----
-paths:
-  - "src/hono/**/*.ts"
----
-
 # Hono Framework Rules
 
 ## App Setup

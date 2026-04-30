@@ -1,8 +1,3 @@
----
-paths:
-  - "src/db/**/*.ts"
----
-
 # Drizzle ORM Rules
 
 ## Schema Definition

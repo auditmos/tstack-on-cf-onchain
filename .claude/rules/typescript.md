@@ -1,8 +1,10 @@
-# Universal TypeScript Rules
+# TypeScript Rules
+
+Project-specific TS conventions (beyond what Biome enforces).
 
 ## Type Safety
 
-- Never use `any`—create explicit interfaces/types
+- Never use `any` — create explicit interfaces/types
 - Prefer `unknown` over `any`, narrow with type guards
 - Use `satisfies` for type-safe object literals with inference
 - Use `as const` for readonly literal types
@@ -19,7 +21,7 @@ type Result<T> = { success: boolean; data?: T; error?: Error }
 ## Error Handling
 
 - Create custom error classes extending `Error`
-- Never `throw new Error(string)`—use typed errors
+- Never `throw new Error(string)` for known errors — use typed errors (e.g. `AppError` from `@/core/errors`)
 - Use `Result<T>` pattern for recoverable errors
 - Let unexpected errors propagate for logging
 
@@ -65,17 +67,3 @@ for (let i = 0; i < items.length; i++) {
   doSomething(item.name)
 }
 ```
-
-# Universal Cloudflare Rules
-
-- Use `wrangler.jsonc` instead of `wrangler.toml` for configuration
-
-# Universal Programming Rules
-
-## Bug Fix Workflow
-
-When a bug is reported:
-1. Write a failing test that reproduces the bug — do not touch implementation yet
-2. Show the failing test and propose a fix — wait for approval
-3. Implement the fix — the test should now pass
-4. Run full test suite to confirm no regressions

@@ -1,9 +1,3 @@
----
-paths:
-  - "src/server.ts"
-  - "src/hono/**/*.ts"
----
-
 # Cloudflare Workers Rules
 
 ## Worker Entry

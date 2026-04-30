@@ -1,9 +1,3 @@
----
-paths:
-  - "src/components/**/*.tsx"
-  - "src/routes/**/*.tsx"
----
-
 # React 19 Rules
 
 ## Component Structure
