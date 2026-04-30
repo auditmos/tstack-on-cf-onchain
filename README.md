@@ -1,16 +1,19 @@
-# TanStack Start on Cloudflare
+# TanStack Start on Cloudflare — On-chain Edition
 
-A production-ready **template** for building full-stack React apps on Cloudflare Workers. Ships with TanStack Start (SSR + file-based routing), a Hono API layer, Neon Postgres via Drizzle ORM, Zod validation, Shadcn/UI, and a strict Biome + Vitest toolchain.
+A production-ready **template** for building full-stack React **dApps** on Cloudflare Workers. It marries a TanStack Start frontend (SSR + file-based routing) and a Hono API on the edge with a complete EVM stack: Foundry contracts, wagmi + viem + ConnectKit on the client, and a typegen pipeline that turns Foundry artifacts into `as const` ABIs and typed contract addresses.
 
-Use it as the starting point for your next project — clone it, rename it, wire up your database, and start shipping.
+Use it as the starting point for your next on-chain project — clone it, rename it, point it at your own contracts, and start shipping.
 
 [![TanStack Start on Cloudflare](https://img.youtube.com/vi/TWWS_lo4kOA/0.jpg)](https://www.youtube.com/watch?v=TWWS_lo4kOA)
 
 ## Why this template
 
+- **Onchain end-to-end** — Solidity contracts in `contracts/`, deployed via Foundry scripts, ABIs and addresses regenerated into `src/contracts/`, consumed through wagmi hooks. Includes a working `Counter` example wired all the way to a UI button.
+- **Wallet UX out of the box** — ConnectKit + wagmi + viem, SSR-safe lazy hydration of the wallet provider, chain whitelist (mainnet / sepolia / anvil) configurable per environment.
 - **Edge-first** — single `src/server.ts` entrypoint that routes `/api/*` to Hono and everything else to TanStack Start, all running on Cloudflare Workers.
-- **Type-safe end-to-end** — strict TypeScript, Zod at every boundary, Drizzle-inferred DB types, typed Cloudflare `Env` via `wrangler types`.
-- **Deep modules** — domain-oriented layout (`src/db/{domain}/`, `src/hono/api/{name}.ts`) with narrow public APIs. See `.claude/rules/deep-modules.md`.
+- **Type-safe end-to-end** — strict TypeScript, Zod at every boundary, Drizzle-inferred DB types, typed Cloudflare `Env` via `wrangler types`, `as const` ABIs and address registries.
+- **Local chain orchestrator** — `pnpm contracts:dev` boots anvil, deploys, regenerates bindings, and keeps the chain in the foreground. Ctrl+C cleans up.
+- **Deep modules** — domain-oriented layout (`src/db/{domain}/`, `src/hono/api/{name}.ts`, `src/lib/web3/`) with narrow public APIs. See `.claude/rules/deep-modules.md`.
 - **Batteries included** — error infrastructure, Neon + Drizzle migrations, Shadcn/UI, TanStack Query SSR hydration, Vitest, Biome, knip, semantic-release, taze.
 - **Agent-friendly** — project rules in `.claude/rules/` activate automatically based on the files you touch.
 
@@ -20,32 +23,49 @@ Use it as the starting point for your next project — clone it, rename it, wire
 # Install dependencies
 pnpm install
 
-# Copy env template and fill in your Neon credentials
-cp .example.vars .dev.vars
+# Copy env templates and fill them in
+cp .example.vars .dev.vars        # Cloudflare bindings (DB credentials)
+cp .env.example .env              # Vite-side env (chain id, WalletConnect)
 
 # Generate Cloudflare Env types
 pnpm cf-typegen
 
-# Run migrations against your dev database
+# (Optional) run migrations against your dev database
 pnpm db:migrate:dev
 
-# Start the dev server
-pnpm dev
-
-# (Optional, in another terminal) start the local chain — anvil + deploy + ABI typegen
+# In one terminal — boot the local chain, deploy contracts, run typegen
 pnpm contracts:dev
+
+# In another terminal — start the dev server
+pnpm dev
 ```
 
-The app runs on http://localhost:3000. API endpoints are served under `/api/*`.
+The app runs on http://localhost:3000. API endpoints are served under `/api/*`. The on-chain Counter card on the landing page reads from the locally deployed contract and lets a connected wallet call `increment()`.
 
 `pnpm contracts:dev` boots anvil on `:8545`, waits for it to be ready, deploys `Counter.sol`, regenerates `src/contracts/`, and keeps anvil in the foreground. Ctrl+C stops it cleanly. Requires [Foundry](https://book.getfoundry.sh/) (`anvil`, `forge`) on your PATH.
+
+### Environment variables
+
+```bash
+# .dev.vars — Cloudflare Worker bindings (server-side, gitignored)
+CLOUDFLARE_ENV=dev
+DATABASE_HOST=""           # leave blank to skip DB init
+DATABASE_USERNAME=""
+DATABASE_PASSWORD=""
+
+# .env — Vite-side, exposed to the browser bundle
+VITE_CHAIN_ID=31337                       # 1 = mainnet, 11155111 = sepolia, 31337 = anvil
+VITE_WALLETCONNECT_PROJECT_ID=""          # https://cloud.walletconnect.com
+```
+
+The DB is only initialised when `DATABASE_HOST` is set, so the template runs fully on-chain without a Postgres instance.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
 | `pnpm dev` | Dev server on port 3000 (Vite + Cloudflare plugin) |
-| `pnpm build` | Production build |
+| `pnpm build` | Production build (runs `contracts:build` + `contracts:typegen` first) |
 | `pnpm serve` | Preview the production build locally |
 | `pnpm deploy` | Build and deploy to Cloudflare Workers |
 | `pnpm cf-typegen` | Generate `Env` types from `wrangler.jsonc` |
@@ -70,19 +90,39 @@ All `db:*` scripts load secrets via `@dotenvx/dotenvx` from `.dev.vars`, `.stagi
 ## Project Structure
 
 ```
+contracts/                     # Self-contained Foundry project
+├── foundry.toml               # profile, fs_permissions, [rpc_endpoints]
+├── remappings.txt             # forge-std/, @openzeppelin/contracts/
+├── src/Counter.sol            # example contract
+├── test/Counter.t.sol         # forge test
+├── script/
+│   ├── DeploymentRegistry.sol # library: read/merge/write registry JSON
+│   └── DeployCounter.s.sol    # forge script
+└── deployments/{chainId}.json # auto-written registry, format: {"Counter":"0x.."}
+
+scripts/
+├── contracts-typegen/         # Foundry artifacts → src/contracts/ bindings
+├── contracts-dev/             # anvil + deploy + typegen orchestrator
+└── seed.ts                    # DB seed entrypoint
+
 src/
 ├── server.ts                  # CF Workers entry — routes /api/* → Hono, rest → TanStack Start
-├── router.tsx                 # TanStack Router instance
+├── router.tsx                 # TanStack Router instance (wraps tree in Web3Provider)
 ├── routes/                    # File-based routes (auto-generates routeTree.gen.ts)
 │   ├── __root.tsx
-│   ├── index.tsx
+│   ├── index.tsx              # Landing page with on-chain Counter card
 │   └── clients.tsx
 ├── components/
 │   ├── ui/                    # Shadcn primitives (do not edit manually)
 │   ├── landing/               # Landing page sections
-│   ├── navigation/            # App navigation
+│   ├── navigation/            # App navigation (includes wallet connect button)
 │   ├── theme/                 # Theme provider / toggle
-│   └── clients/               # Feature components
+│   ├── clients/               # CRUD example
+│   └── web3/                  # ConnectButton, CounterCard (SSR-safe lazy live shells)
+├── contracts/                 # Generated — do not edit
+│   ├── abis/Counter.ts        # `as const` ABI
+│   ├── addresses.ts           # `as const` chainId → name → address
+│   └── README.md
 ├── core/
 │   ├── errors.ts              # AppError, Result<T>, isUniqueViolation
 │   ├── functions/             # TanStack server functions
@@ -97,12 +137,13 @@ src/
 ├── hono/
 │   ├── factory.ts             # Typed Hono factory with CF Bindings
 │   ├── api.ts                 # Router mounting /api/health, /api/clients
-│   └── api/
-│       ├── health.ts
-│       └── clients.ts         # REST CRUD for clients
-├── integrations/tanstack-query/
+│   └── api/{health,clients}.ts
+├── integrations/
+│   ├── tanstack-query/        # QueryClient + SSR provider
+│   └── web3/                  # Web3Provider (lazy WagmiProvider + ConnectKit)
 ├── lib/
-├── utils/
+│   ├── utils.ts
+│   └── web3/                  # chains, wagmi-config, contract-address, useCounter, wallet-ready-context
 └── styles.css                 # Tailwind v4 entry
 ```
 
@@ -116,6 +157,8 @@ Path alias `@/*` resolves to `src/*`.
 | UI | React 19, Shadcn/UI (new-york, Zinc), Tailwind CSS v4, Lucide |
 | API | Hono on Cloudflare Workers |
 | Runtime | Cloudflare Workers (`nodejs_compat`) |
+| Wallet / Web3 | wagmi 2 + viem 2 + ConnectKit |
+| Smart contracts | Solidity 0.8.28, Foundry, Soldeer (OpenZeppelin, forge-std) |
 | Database | Neon Postgres + Drizzle ORM (`neon-http`) |
 | Validation | Zod 4 |
 | Forms | TanStack Form |
@@ -125,6 +168,136 @@ Path alias `@/*` resolves to `src/*`.
 | Dead-code detection | knip |
 | Release | semantic-release |
 | Package manager | pnpm 10 |
+
+## Web3 / EVM Integration
+
+The on-chain stack is structured as deep modules, with the wagmi/ConnectKit provider isolated behind a tiny SSR-safe shell so the worker bundle stays lean and hydration is always correct.
+
+### Wallet provider (SSR-safe lazy hydration)
+
+`src/integrations/web3/root-provider.tsx` mounts a placeholder `QueryClientProvider` during SSR and the first client render, then lazy-loads the real `WalletProvider` (WagmiProvider + ConnectKitProvider) once `useEffect` confirms we're on the client. Components that need wallet APIs gate themselves on a `WalletReadyContext` flag, falling back to a placeholder until the provider is up.
+
+```tsx
+// src/integrations/web3/root-provider.tsx
+const WalletProvider = lazy(() => import("./wallet-provider"));
+
+export function Web3Provider({ children, queryClient }: Web3ProviderProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const queryShell = <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  if (!mounted) return queryShell;
+
+  return (
+    <Suspense fallback={queryShell}>
+      <WalletProvider queryClient={queryClient}>{children}</WalletProvider>
+    </Suspense>
+  );
+}
+```
+
+`Web3Provider` is wired into the router in `src/router.tsx` via the `Wrap` option, so every route gets it for free.
+
+### Chains and wagmi config
+
+Supported chains live in a single registry (`src/lib/web3/chains.ts`). The active chain comes from `VITE_CHAIN_ID` and feeds both wagmi transports and contract reads.
+
+```ts
+// src/lib/web3/chains.ts
+const SUPPORTED: Record<number, Chain> = {
+  1: mainnet,
+  11155111: sepolia,
+  31337: anvil,
+};
+
+export const activeChain: Chain = resolveChain(Number(import.meta.env.VITE_CHAIN_ID ?? 31337));
+```
+
+Add a chain by extending `SUPPORTED`. `createWagmiConfig` in `src/lib/web3/wagmi-config.ts` builds an `http()` transport per supported chain and pulls the WalletConnect project id from `VITE_WALLETCONNECT_PROJECT_ID`.
+
+### Generated contract bindings (`src/contracts/`)
+
+`pnpm contracts:typegen` reads Foundry artifacts and the per-chain deployment registries, then writes:
+
+- `src/contracts/abis/<Name>.ts` — `as const` ABI for every user contract in `contracts/src/`.
+- `src/contracts/addresses.ts` — `as const` mapping `chainId → name → address`, sourced from `contracts/deployments/{chainId}.json`.
+
+Both files are gitignored — never edit them by hand. `pnpm build` runs `contracts:build` and `contracts:typegen` automatically via `prebuild`, so the bundle always ships fresh bindings.
+
+### Typed contract hooks
+
+A typical wagmi hook over the generated bindings — read + write + transaction watcher in one place:
+
+```ts
+// src/lib/web3/use-counter.ts
+export function useCounter(): UseCounterResult {
+  const address = getContractAddress(activeChain.id, "Counter");
+  const { isConnected } = useAccount();
+  const { writeContract, data: txHash, isPending: isWritePending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
+
+  const { data, isLoading, refetch } = useReadContract({
+    abi: counterAbi,
+    address,
+    functionName: "get",
+    chainId: activeChain.id,
+  });
+
+  useEffect(() => { if (isConfirmed) refetch(); }, [isConfirmed, refetch]);
+
+  const increment = () => {
+    if (!address) return;
+    writeContract({ abi: counterAbi, address, functionName: "increment", chainId: activeChain.id });
+  };
+
+  return { value: data, isLoading, hasAddress: Boolean(address), isConnected, isInFlight: isWritePending || isConfirming, increment };
+}
+```
+
+UI components (`src/components/web3/connect-button.tsx`, `counter-card.tsx`) use the same lazy-shell pattern as `Web3Provider`: a static placeholder for SSR, a `lazy()` "live" component once `WalletReadyContext` flips. This keeps the wallet runtime out of the SSR HTML and avoids hydration mismatches.
+
+### Smart contracts (Foundry)
+
+The `contracts/` folder is a self-contained Foundry project. Soldeer manages dependencies (OpenZeppelin, forge-std), `pnpm contracts:typegen` generates `as const` ABIs + typed addresses into `src/contracts/`, and Solidity deploy scripts in `contracts/script/` write deployed addresses to `contracts/deployments/{chainId}.json`.
+
+#### Deploy
+
+RPC endpoints come from `[rpc_endpoints]` in `foundry.toml`:
+
+```toml
+[rpc_endpoints]
+local = "http://127.0.0.1:8545"
+testnet = "${TESTNET_RPC_URL}"
+mainnet = "${MAINNET_RPC_URL}"
+```
+
+Set `TESTNET_RPC_URL` / `MAINNET_RPC_URL` in your shell or `.dev.vars` before deploying. The `local` profile points at anvil and is the smoke-test path.
+
+```bash
+# Local — preferred: orchestrated end-to-end
+pnpm contracts:dev
+# anvil :8545 → DeployCounter → typegen, anvil stays in foreground
+
+# Local — manual
+anvil --silent &
+pnpm contracts:deploy:local
+# → contracts/deployments/31337.json now contains {"Counter":"0x.."}
+pnpm contracts:typegen
+
+# Testnet / mainnet — supply your signer
+TESTNET_RPC_URL=https://... pnpm contracts:deploy:testnet --private-key $DEPLOYER_PRIVATE_KEY
+MAINNET_RPC_URL=https://... pnpm contracts:deploy:mainnet --private-key $DEPLOYER_PRIVATE_KEY
+```
+
+Any flags after the script name (`--private-key`, `--account <keystore>`, `--ledger`, `--verify`, …) are forwarded to `forge script`. The local script bakes in anvil's well-known dev key — never use it on a real chain.
+
+The deploy script delegates to `DeploymentRegistry.record(path, name, address)`, which:
+- reads `contracts/deployments/{chainId}.json` if it exists,
+- preserves entries for other contracts,
+- overwrites the entry for the redeployed contract,
+- creates the parent directory if missing.
+
+Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.ts` with the new addresses (or just use `pnpm contracts:dev`, which does it for you).
 
 ## Cloudflare Integration
 
@@ -152,7 +325,7 @@ Path alias `@/*` resolves to `src/*`.
 
 ### Custom Server Entry (`src/server.ts`)
 
-One fetch handler owns the entire worker: it boots the DB once per isolate, then dispatches to Hono or TanStack Start.
+One fetch handler owns the entire worker: it boots the DB once per isolate (only when `DATABASE_HOST` is set) and dispatches to Hono or TanStack Start.
 
 ```ts
 import handler from "@tanstack/react-start/server-entry";
@@ -161,11 +334,13 @@ import { apiHono } from "@/hono/api";
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    initDatabase({
-      host: env.DATABASE_HOST,
-      username: env.DATABASE_USERNAME,
-      password: env.DATABASE_PASSWORD,
-    });
+    if (env.DATABASE_HOST) {
+      initDatabase({
+        host: env.DATABASE_HOST,
+        username: env.DATABASE_USERNAME,
+        password: env.DATABASE_PASSWORD,
+      });
+    }
 
     const url = new URL(request.url);
 
@@ -182,7 +357,7 @@ You can extend this handler with Queue consumers, scheduled events, or Durable O
 
 ### Secrets & Environments
 
-Secrets live in per-environment `.vars` files, never committed:
+Worker secrets live in per-environment `.vars` files, never committed:
 
 ```bash
 # .dev.vars
@@ -192,11 +367,11 @@ DATABASE_USERNAME="neondb_owner"
 DATABASE_PASSWORD="npg_xxx"
 ```
 
-For staging/production, create `.staging.vars` / `.production.vars` and set the same keys as Cloudflare secrets via `wrangler secret put`.
+For staging/production, create `.staging.vars` / `.production.vars` and set the same keys as Cloudflare secrets via `wrangler secret put`. Vite-side variables (`VITE_*`) belong in `.env` / `.env.<mode>` because they're inlined into the browser bundle.
 
 ## Database (Neon + Drizzle)
 
-The DB module follows the **deep-modules** pattern: every domain has its own folder with a narrow public API.
+The DB layer is **optional** — leave `DATABASE_HOST` empty and the worker skips initialization. When you do need persistence, the DB module follows the **deep-modules** pattern: every domain has its own folder with a narrow public API.
 
 ```
 src/db/client/
@@ -237,56 +412,6 @@ pnpm db:studio
 ```
 
 Per-env configs (`drizzle-dev.config.ts`, `drizzle-staging.config.ts`, `drizzle-production.config.ts`) all point at `src/db/schema.ts` but write migrations to separate directories, allowing independent migration tracking per environment.
-
-## Smart Contracts (Foundry)
-
-The `contracts/` folder is a self-contained Foundry project. Soldeer manages dependencies (OpenZeppelin, forge-std), `pnpm contracts:typegen` generates `as const` ABIs + typed addresses into `src/contracts/`, and Solidity deploy scripts in `contracts/script/` write deployed addresses to `contracts/deployments/{chainId}.json`.
-
-```
-contracts/
-├── foundry.toml           # profile, fs_permissions, [rpc_endpoints]
-├── remappings.txt         # forge-std/, @openzeppelin/contracts/
-├── src/Counter.sol        # example contract
-├── test/Counter.t.sol     # forge test
-├── script/
-│   ├── DeploymentRegistry.sol  # library: read/merge/write registry JSON
-│   └── DeployCounter.s.sol     # forge script
-└── deployments/{chainId}.json  # auto-written registry, format: {"Counter":"0x.."}
-```
-
-### Deploy
-
-RPC endpoints come from `[rpc_endpoints]` in `foundry.toml`:
-
-```toml
-[rpc_endpoints]
-local = "http://127.0.0.1:8545"
-testnet = "${TESTNET_RPC_URL}"
-mainnet = "${MAINNET_RPC_URL}"
-```
-
-Set `TESTNET_RPC_URL` / `MAINNET_RPC_URL` in your shell or `.dev.vars` before deploying. The `local` profile points at anvil and is the smoke-test path.
-
-```bash
-# Local smoke test (anvil must be running on :8545)
-anvil --silent &
-pnpm contracts:deploy:local
-# → contracts/deployments/31337.json now contains {"Counter":"0x.."}
-
-# Testnet / mainnet — supply your signer
-TESTNET_RPC_URL=https://... pnpm contracts:deploy:testnet --private-key $DEPLOYER_PRIVATE_KEY
-MAINNET_RPC_URL=https://... pnpm contracts:deploy:mainnet --private-key $DEPLOYER_PRIVATE_KEY
-```
-
-Any flags after the script name (`--private-key`, `--account <keystore>`, `--ledger`, `--verify`, …) are forwarded to `forge script`. The local script bakes in anvil's well-known dev key — never use it on a real chain.
-
-The deploy script delegates to `DeploymentRegistry.record(path, name, address)`, which:
-- reads `contracts/deployments/{chainId}.json` if it exists,
-- preserves entries for other contracts,
-- overwrites the entry for the redeployed contract,
-- creates the parent directory if missing.
-
-Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.ts` with the new addresses.
 
 ## REST API with Hono
 
@@ -432,6 +557,7 @@ SSR hydration is wired up in `src/integrations/tanstack-query/` — loaders can 
 
 - **File-based routing** — add files to `src/routes/`, the tree auto-generates to `routeTree.gen.ts` on dev/build. Never edit the generated file.
 - **Root layout** — `src/routes/__root.tsx`.
+- **Router wrapper** — `src/router.tsx` wraps the tree in `Web3Provider`, so wallet hooks work in any route.
 - **Shadcn/UI** — add components with `pnpx shadcn@latest add <component>`. Configured via `components.json` (new-york style, Zinc base, CSS variables).
 - **Tailwind v4** — configured through the `@tailwindcss/vite` plugin, no separate config file. Styles entrypoint: `src/styles.css`.
 
@@ -446,14 +572,14 @@ pnpm test:coverage  # v8 coverage
 - Tests live next to source as `*.test.ts` / `*.test.tsx`.
 - Vitest globals are enabled — no need to import `describe` / `it` / `expect`.
 - Route files (`src/routes/**`) are excluded from test discovery.
-- Test at module boundaries (exported queries, HTTP requests, user interactions), not internals. See `.claude/rules/deep-modules.md`.
+- Test at module boundaries (exported queries, HTTP requests, user interactions, wagmi hook outputs), not internals. See `.claude/rules/deep-modules.md`.
 
 ## Agent Rules & Design Docs
 
 This template is set up for agent-assisted development:
 
 - `.claude/CLAUDE.md` — project-wide instructions.
-- `.claude/rules/` — topic rules (`general.md`, `deep-modules.md`, `error-handling.md`, `atomic-imports.md`, `cloudflare-deployment.md`, plus stack-specific rules under `db/` and `frontend/`) that activate automatically based on the files being edited.
+- `.claude/rules/` — topic rules (`general.md`, `deep-modules.md`, `error-handling.md`, `atomic-imports.md`, `cloudflare-deployment.md`, plus stack-specific rules under `db/`, `api/`, and `frontend/`) that activate automatically based on the files being edited.
 - `AGENTS.md` — agent workflow guide.
 - `/docs` — single source of truth for business requirements / design docs.
 
@@ -461,9 +587,11 @@ This template is set up for agent-assisted development:
 
 1. Click **Use this template** on GitHub (or `gh repo create --template`).
 2. Rename the worker in `wrangler.jsonc` (`name`) and `package.json` (`name`).
-3. Provision a Neon database and fill in `.dev.vars`.
-4. Run `pnpm cf-typegen && pnpm db:migrate:dev && pnpm dev`.
-5. Delete `src/db/client/` and `src/hono/api/clients.ts` when you no longer need the example CRUD, and start modelling your own domain.
+3. Drop your contracts into `contracts/src/`, write a `Deploy<Name>.s.sol` script in `contracts/script/`, and add a deploy command in `package.json` mirroring `contracts:deploy:local`.
+4. Run `pnpm contracts:dev` — anvil + deploy + typegen in one go.
+5. (Optional) provision a Neon database and fill in `.dev.vars` / `pnpm cf-typegen && pnpm db:migrate:dev` if you need persistence.
+6. Set `VITE_CHAIN_ID` and `VITE_WALLETCONNECT_PROJECT_ID` in `.env`.
+7. Delete `src/db/client/`, `src/hono/api/clients.ts`, and the example `Counter` flow when you no longer need the demos, and start modelling your own domain.
 
 ## Learn More
 
@@ -471,6 +599,11 @@ This template is set up for agent-assisted development:
 - **[TanStack Router](https://tanstack.com/router)** — type-safe routing
 - **[TanStack Query](https://tanstack.com/query)** — server state management
 - **[Hono](https://hono.dev/)** — fast web framework for APIs
+- **[wagmi](https://wagmi.sh/)** — React Hooks for Ethereum
+- **[viem](https://viem.sh/)** — TypeScript interface for Ethereum
+- **[ConnectKit](https://docs.family.co/connectkit)** — wallet connection UI
+- **[Foundry](https://book.getfoundry.sh/)** — Solidity dev toolchain
+- **[Soldeer](https://soldeer.xyz/)** — Solidity package manager
 - **[Drizzle ORM](https://orm.drizzle.team/)** — type-safe SQL
 - **[Neon](https://neon.tech/)** — serverless Postgres
 - **[Cloudflare Workers](https://workers.cloudflare.com/)** — edge computing platform
