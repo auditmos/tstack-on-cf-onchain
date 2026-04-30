@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.4.0...v1.5.0) (2026-04-30)
+
+
+### Bug Fixes
+
+* **contracts:** create test/tmp dir in DeploymentRegistry test setUp ([8942052](https://github.com/auditmos/tstack-on-cf-onchain/commit/89420527ed8d68468895e19b91752babd518417c))
+
+
+### Features
+
+* **web3:** Counter end-to-end UI (issue [#7](https://github.com/auditmos/tstack-on-cf-onchain/issues/7)) ([a7d8799](https://github.com/auditmos/tstack-on-cf-onchain/commit/a7d879925419926070a057e7806d0ae0e3643551))
+
 # [1.4.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.3.0...v1.4.0) (2026-04-29)
 
 
