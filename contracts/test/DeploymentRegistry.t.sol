@@ -5,6 +5,12 @@ import {Test} from "forge-std/Test.sol";
 import {DeploymentRegistry} from "../script/DeploymentRegistry.sol";
 
 contract DeploymentRegistryTest is Test {
+    function setUp() public {
+        if (!vm.exists("test/tmp")) {
+            vm.createDir("test/tmp", true);
+        }
+    }
+
     function _path(string memory suffix) internal pure returns (string memory) {
         return string.concat("test/tmp/registry-", suffix, ".json");
     }
