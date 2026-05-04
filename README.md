@@ -6,6 +6,18 @@ Use it as the starting point for your next on-chain project — clone it, rename
 
 [![TanStack Start on Cloudflare](https://img.youtube.com/vi/TWWS_lo4kOA/0.jpg)](https://www.youtube.com/watch?v=TWWS_lo4kOA)
 
+## Using this Template
+
+1. Click **Use this template** on GitHub (or `gh repo create --template`).
+2. Rename the worker in `wrangler.jsonc` (`name`) and `package.json` (`name`).
+3. Drop your contracts into `contracts/src/`, write a `Deploy<Name>.s.sol` script in `contracts/script/`, and add a deploy command in `package.json` mirroring `contracts:deploy:local`.
+4. Run `pnpm contracts:dev` — anvil + deploy + typegen in one go.
+5. (Optional) provision a Neon database and fill in `.dev.vars` / `pnpm cf-typegen && pnpm db:migrate:dev` if you need persistence.
+6. Set `VITE_CHAIN_ID` and `VITE_WALLETCONNECT_PROJECT_ID` in `.env`.
+7. Delete `src/db/client/`, `src/hono/api/clients.ts`, and the example `Counter` flow when you no longer need the demos, and start modelling your own domain.
+
+See [Quick Start](#quick-start) below for the dev-loop commands.
+
 ## Why this template
 
 - **Onchain end-to-end** — Solidity contracts in `contracts/`, deployed via Foundry scripts, ABIs and addresses regenerated into `src/contracts/`, consumed through wagmi hooks. Includes a working `Counter` example wired all the way to a UI button.
@@ -582,16 +594,6 @@ This template is set up for agent-assisted development:
 - `.claude/rules/` — topic rules (`general.md`, `deep-modules.md`, `error-handling.md`, `atomic-imports.md`, `cloudflare-deployment.md`, plus stack-specific rules under `db/`, `api/`, and `frontend/`) that activate automatically based on the files being edited.
 - `AGENTS.md` — agent workflow guide.
 - `/docs` — single source of truth for business requirements / design docs.
-
-## Using this Template
-
-1. Click **Use this template** on GitHub (or `gh repo create --template`).
-2. Rename the worker in `wrangler.jsonc` (`name`) and `package.json` (`name`).
-3. Drop your contracts into `contracts/src/`, write a `Deploy<Name>.s.sol` script in `contracts/script/`, and add a deploy command in `package.json` mirroring `contracts:deploy:local`.
-4. Run `pnpm contracts:dev` — anvil + deploy + typegen in one go.
-5. (Optional) provision a Neon database and fill in `.dev.vars` / `pnpm cf-typegen && pnpm db:migrate:dev` if you need persistence.
-6. Set `VITE_CHAIN_ID` and `VITE_WALLETCONNECT_PROJECT_ID` in `.env`.
-7. Delete `src/db/client/`, `src/hono/api/clients.ts`, and the example `Counter` flow when you no longer need the demos, and start modelling your own domain.
 
 ## Learn More
 
