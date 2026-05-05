@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.5.0...v1.6.0) (2026-05-05)
+
+
+### Features
+
+* add init-project script + foundry env support ([95a9ec0](https://github.com/auditmos/tstack-on-cf-onchain/commit/95a9ec04c3ec45291370dec097af53a654c89d72))
+
 # [1.5.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.4.0...v1.5.0) (2026-04-30)
 
 
