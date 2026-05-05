@@ -4,7 +4,7 @@ import { counterAbi } from "@/contracts/abis/Counter";
 import { activeChain } from "./chains";
 import { getContractAddress } from "./contract-address";
 
-export interface UseCounterResult {
+interface UseCounterResult {
 	value: bigint | undefined;
 	isLoading: boolean;
 	hasAddress: boolean;

@@ -4,7 +4,7 @@ import { isUserArtifact } from "./filter-artifacts";
 import { type FoundryArtifact, generateAbiModule } from "./generate-abi";
 import { type DeploymentRegistry, generateAddressesModule } from "./generate-addresses";
 
-export interface TypegenOptions {
+interface TypegenOptions {
 	artifactsDir: string;
 	deploymentsDir: string;
 	outDir: string;

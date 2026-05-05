@@ -1,4 +1,4 @@
-export interface WaitForReadyOptions {
+interface WaitForReadyOptions {
 	url: string;
 	timeoutMs: number;
 	intervalMs: number;

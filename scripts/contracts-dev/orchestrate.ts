@@ -2,7 +2,7 @@ export interface AnvilProcess {
 	kill: (signal?: NodeJS.Signals) => void;
 }
 
-export interface Logger {
+interface Logger {
 	info: (msg: string) => void;
 	error: (msg: string) => void;
 }
