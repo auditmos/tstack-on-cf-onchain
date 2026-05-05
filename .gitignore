@@ -22,6 +22,7 @@ count.txt
 .wrangler/
 
 # Foundry
+contracts/.env
 contracts/out/
 contracts/cache/
 contracts/dependencies/
