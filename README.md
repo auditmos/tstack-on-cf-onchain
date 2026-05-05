@@ -11,12 +11,13 @@ Use it as the starting point for your next on-chain project — clone it, rename
 ## Using this Template
 
 1. Click **Use this template** on GitHub (or `gh repo create --template`).
-2. Rename the worker in `wrangler.jsonc` (`name`) and `package.json` (`name`).
-3. Drop your contracts into `contracts/src/`, write a `Deploy<Name>.s.sol` script in `contracts/script/`, and add a deploy command in `package.json` mirroring `contracts:deploy:local`.
-4. Run `pnpm contracts:dev` — anvil + deploy + typegen in one go.
-5. (Optional) provision a Neon database and fill in `.dev.vars` / `pnpm cf-typegen && pnpm db:migrate:dev` if you need persistence.
-6. Set `VITE_CHAIN_ID` and `VITE_WALLETCONNECT_PROJECT_ID` in `.env`.
-7. Delete `src/db/client/`, `src/hono/api/clients.ts`, and the example `Counter` flow when you no longer need the demos, and start modelling your own domain.
+2. `pnpm install`.
+3. `pnpm run init-project` — prompts for a kebab-case project name, renames `wrangler.jsonc` + `package.json`, and fans out the `*.example` templates into per-env files (`.env` / `.env.staging` / `.env.production`, `.dev.vars` / `.staging.vars` / `.production.vars`, `contracts/.env`). Idempotent — re-runnable, never overwrites filled-in files. The script's "Next steps" output lists every field that still needs a value.
+4. Set `VITE_CHAIN_ID` (default `31337` Anvil; use `11155111` for sepolia, `1` for mainnet) and `VITE_WALLETCONNECT_PROJECT_ID` (free at https://cloud.walletconnect.com) in `.env` / `.env.staging` / `.env.production`.
+5. Drop your contracts into `contracts/src/`, write a `Deploy<Name>.s.sol` script in `contracts/script/`, and add a deploy command in `package.json` mirroring `contracts:deploy:local` (`testnet` / `mainnet` variants are wrapped with `dotenvx run -f contracts/.env` and read `${TESTNET_RPC_URL}` / `${MAINNET_RPC_URL}` from there).
+6. Run `pnpm contracts:dev` — anvil + deploy + typegen in one go.
+7. *(Optional)* provision a Neon database, fill `DATABASE_HOST/USERNAME/PASSWORD` in `.dev.vars`, then `pnpm cf-typegen && pnpm db:migrate:dev`.
+8. *(Optional, when you're done with the demos)* delete `src/db/client/`, `src/hono/api/clients.ts`, and the example `Counter` flow. Then start modelling your own domain.
 
 See [Quick Start](#quick-start) below for the dev-loop commands.
 
