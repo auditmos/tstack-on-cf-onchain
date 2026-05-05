@@ -1,5 +1,7 @@
 # TanStack Start on Cloudflare — On-chain Edition
 
+*AI agent index: [llms.txt](./llms.txt)*
+
 A production-ready **template** for building full-stack React **dApps** on Cloudflare Workers. It marries a TanStack Start frontend (SSR + file-based routing) and a Hono API on the edge with a complete EVM stack: Foundry contracts, wagmi + viem + ConnectKit on the client, and a typegen pipeline that turns Foundry artifacts into `as const` ABIs and typed contract addresses.
 
 Use it as the starting point for your next on-chain project — clone it, rename it, point it at your own contracts, and start shipping.
