@@ -38,3 +38,6 @@ contracts/deployments/31337.json
 
 # Claude Code runtime locks
 .claude/scheduled_tasks.lock
+
+# Codex local config (mirrors .claude/)
+.codex/

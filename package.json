@@ -6,6 +6,7 @@
 	"scripts": {
 		"prepare": "simple-git-hooks",
 		"init-project": "tsx scripts/init-project.ts",
+		"compat-date:bump": "tsx scripts/bump-compat-date.ts",
 		"dev": "vite dev --port 3000",
 		"prebuild": "pnpm contracts:build && pnpm contracts:typegen",
 		"build": "vite build",

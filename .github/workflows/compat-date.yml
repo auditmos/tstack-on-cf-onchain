@@ -1,0 +1,97 @@
+name: Compat-date bump
+
+on:
+  schedule:
+    # Monday 07:00 UTC (one hour after deps-update.yml so PRs don't collide).
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: compat-date-bump
+  cancel-in-progress: false
+
+env:
+  # Future-proof: opt into Node 24 for JS actions before GH forces it (2026-06-02 default, 2026-09-16 hard cutoff)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  bump:
+    name: Bump compatibility_date if > 90 days behind
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Script exits:
+      #   0  → bumped wrangler.jsonc; open PR
+      #   78 → no-op, current date still within threshold
+      #   >0 → real error (fail the job)
+      - name: Check and bump compatibility_date
+        id: bump
+        run: |
+          set +e
+          pnpm run compat-date:bump
+          code=$?
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          case $code in
+            0)  echo "bumped=true"  >> "$GITHUB_OUTPUT" ;;
+            78) echo "bumped=false" >> "$GITHUB_OUTPUT" ;;
+            *)  exit $code ;;
+          esac
+
+      - name: Regenerate worker types
+        if: steps.bump.outputs.bumped == 'true'
+        run: pnpm run cf-typegen
+
+      - name: Type check
+        if: steps.bump.outputs.bumped == 'true'
+        run: pnpm run types
+
+      - name: Test
+        if: steps.bump.outputs.bumped == 'true'
+        run: pnpm run test
+
+      - name: Open PR
+        if: steps.bump.outputs.bumped == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/compat-date-bump
+          delete-branch: true
+          commit-message: "chore(cf): bump compatibility_date to current"
+          title: "chore(cf): bump compatibility_date to current"
+          body: |
+            Automated weekly check found `wrangler.jsonc.compatibility_date`
+            more than 90 days behind today. Bumped to today's date and
+            regenerated `worker-configuration.d.ts` via `pnpm cf-typegen`.
+
+            Validated by this job before opening the PR:
+            - `pnpm compat-date:bump`
+            - `pnpm cf-typegen`
+            - `pnpm types`
+            - `pnpm test`
+
+            Review the diff in `wrangler.jsonc` and `worker-configuration.d.ts`.
+            Close this PR if you want to pin to an older runtime intentionally.
+
+            Note: `secrets.GITHUB_TOKEN` does not trigger CI on PRs it creates.
+            Click "Re-run all jobs" or push an empty commit to run CI.
+          labels: automated, audit:workers-best-practices
