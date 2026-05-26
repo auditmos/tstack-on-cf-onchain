@@ -1,3 +1,10 @@
+## [1.7.4](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.3...v1.7.4) (2026-05-26)
+
+
+### Bug Fixes
+
+* **test:** silence MaxListeners warning from WalletConnect heartbeat ([#32](https://github.com/auditmos/tstack-on-cf-onchain/issues/32)) ([7f4b475](https://github.com/auditmos/tstack-on-cf-onchain/commit/7f4b475758ea7b3c4e768b40c8533cc335d7da69))
+
 ## [1.7.3](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.2...v1.7.3) (2026-05-26)
 
 
