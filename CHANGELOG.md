@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.6.0...v1.6.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **security:** stop declaring DB credentials as wrangler vars ([#15](https://github.com/auditmos/tstack-on-cf-onchain/issues/15)) ([e9c5c6f](https://github.com/auditmos/tstack-on-cf-onchain/commit/e9c5c6f0bbdc9040ad8fff1236c52c8cd3664d12))
+
 # [1.6.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.5.0...v1.6.0) (2026-05-05)
 
 
