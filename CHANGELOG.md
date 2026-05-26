@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.0...v1.7.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **observability:** enable Workers Logs at top-level wrangler config ([#17](https://github.com/auditmos/tstack-on-cf-onchain/issues/17)) ([591049d](https://github.com/auditmos/tstack-on-cf-onchain/commit/591049de1fe9b00148fd2bfe0464861137441b72))
+
 # [1.7.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.6.1...v1.7.0) (2026-05-26)
 
 
