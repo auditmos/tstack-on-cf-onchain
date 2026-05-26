@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { AppError } from "@/core/errors";
 import { exampleMiddlewareWithContext } from "@/core/middleware/example-middleware";
 
 // import { env } from "cloudflare:workers";
@@ -12,8 +13,16 @@ const ExampleInputSchema = z.object({
 
 type ExampleInput = z.infer<typeof ExampleInputSchema>;
 
+export function validateExampleInput(data: unknown): ExampleInput {
+	const parsed = ExampleInputSchema.safeParse(data);
+	if (!parsed.success) {
+		throw new AppError("Invalid input", "VALIDATION", 400);
+	}
+	return parsed.data;
+}
+
 export const examplefunction = baseFunction
-	.inputValidator((data: ExampleInput) => ExampleInputSchema.parse(data))
+	.inputValidator(validateExampleInput)
 	.handler(async (ctx) => {
 		// biome-ignore lint/suspicious/noConsole: demo logs for server function execution flow
 		console.log(
