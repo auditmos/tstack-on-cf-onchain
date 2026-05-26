@@ -97,7 +97,6 @@
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^4.7.0",
 		"@vitest/coverage-v8": "^4.1.7",
-		"@vitest/coverage-v8": "^4.1.6",
 		"cross-env": "^10.1.0",
 		"drizzle-kit": "^0.31.10",
 		"jsdom": "^26.1.0",
