@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.1...v1.7.2) (2026-05-26)
+
+
+### Bug Fixes
+
+* **cf:** bump compatibility_date + add 180-day freshness test ([#18](https://github.com/auditmos/tstack-on-cf-onchain/issues/18)) ([3751fb9](https://github.com/auditmos/tstack-on-cf-onchain/commit/3751fb9c5324a7a50ba766ec40de652f886ced49))
+
 ## [1.7.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.0...v1.7.1) (2026-05-26)
 
 
