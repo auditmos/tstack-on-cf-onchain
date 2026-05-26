@@ -17,6 +17,10 @@ type WranglerEnv = {
 type WranglerConfig = {
 	name?: string;
 	env?: Record<string, WranglerEnv>;
+	observability?: {
+		enabled?: boolean;
+		logs?: { head_sampling_rate?: number };
+	};
 };
 
 function readWranglerConfig(): WranglerConfig {
@@ -34,6 +38,17 @@ function readPackageScripts(): Record<string, string> {
 describe("wrangler.jsonc multi-env configuration", () => {
 	const config = readWranglerConfig();
 	const envs = config.env ?? {};
+
+	it("enables observability at the top level so dev deploys emit Workers Logs", () => {
+		expect(config.observability?.enabled).toBe(true);
+	});
+
+	it("declares observability.logs.head_sampling_rate at the top level (number in [0, 1])", () => {
+		const rate = config.observability?.logs?.head_sampling_rate;
+		expect(typeof rate).toBe("number");
+		expect(rate).toBeGreaterThanOrEqual(0);
+		expect(rate).toBeLessThanOrEqual(1);
+	});
 
 	it("declares env.staging with a distinct worker name", () => {
 		expect(envs.staging).toBeDefined();
