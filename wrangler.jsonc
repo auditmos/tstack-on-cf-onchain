@@ -6,5 +6,27 @@
 	"main": "./src/server.ts",
 	"vars": {
 		"CLOUDFLARE_ENV": "dev"
+	},
+	"env": {
+		"staging": {
+			"name": "tanstack-start-app-staging",
+			"vars": {
+				"CLOUDFLARE_ENV": "staging"
+			},
+			"observability": {
+				"enabled": true,
+				"logs": { "head_sampling_rate": 1 }
+			}
+		},
+		"production": {
+			"name": "tanstack-start-app-production",
+			"vars": {
+				"CLOUDFLARE_ENV": "production"
+			},
+			"observability": {
+				"enabled": true,
+				"logs": { "head_sampling_rate": 1 }
+			}
+		}
 	}
 }

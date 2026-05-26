@@ -25,16 +25,39 @@
 
 ## Vite Plugin Environments (`@cloudflare/vite-plugin`)
 
-- The Vite plugin reads all env blocks from `wrangler.jsonc` and resolves bindings automatically
-- `vite build --mode staging` bakes environment config (routes, bindings, worker name) into the build output
-- `wrangler deploy --env=''` deploys the pre-configured build — the env is already embedded by the plugin
+- The plugin selects which `env.<name>` block to deploy by reading `process.env.CLOUDFLARE_ENV` **at build time**, then flattens that block into `dist/server/wrangler.json`.
+- `vite build --mode <name>` alone does NOT pick the Cloudflare env — `--mode` is a Vite-only concept (`import.meta.env.MODE` + `.env.<mode>` loading). Use `cross-env CLOUDFLARE_ENV=<name> vite build`, or put `CLOUDFLARE_ENV=<name>` inside a `.env.<name>` file and run with `--mode <name>`.
+- `wrangler deploy --env <name>` is **not applicable** with this plugin — deploy reads the already-flattened built manifest. Run plain `wrangler deploy` after the env-scoped build.
+- Source: [Cloudflare Vite plugin — environments](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/), [migrating from `wrangler dev`](https://developers.cloudflare.com/workers/vite-plugin/reference/migrating-from-wrangler-dev/).
+
+## Per-Env `wrangler.jsonc` Shape
+
+```jsonc
+"env": {
+  "staging": {
+    "name": "tanstack-start-app-staging",
+    "vars": { "CLOUDFLARE_ENV": "staging" },
+    "observability": { "enabled": true, "logs": { "head_sampling_rate": 1 } }
+  },
+  "production": {
+    "name": "tanstack-start-app-production",
+    "vars": { "CLOUDFLARE_ENV": "production" },
+    "observability": { "enabled": true, "logs": { "head_sampling_rate": 1 } }
+  }
+}
+```
+
+**Gotcha:** env-level `vars`, `bindings`, and secrets are **NOT inherited from top-level** — re-declare every value each env needs, or it will be missing at runtime. Secrets must be set with `wrangler secret put --env <env>` per env.
 
 ## Deploy Script Pattern
 
 ```jsonc
-// Vite plugin — env baked into build via --mode
-"build:staging": "vite build --mode staging",
-"deploy:staging": "pnpm run build:staging && wrangler deploy --env=''"
+// Vite plugin reads CLOUDFLARE_ENV → flattens env.<name> into dist/server/wrangler.json
+// cross-env keeps this Windows-portable
+"build:staging":     "cross-env CLOUDFLARE_ENV=staging vite build",
+"deploy:staging":    "pnpm run build:staging && wrangler deploy",
+"build:production":  "cross-env CLOUDFLARE_ENV=production vite build",
+"deploy:production": "pnpm run build:production && wrangler deploy"
 ```
 
 ## Debugging "Too Many Redirects"
