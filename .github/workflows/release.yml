@@ -63,6 +63,11 @@ jobs:
       - name: Type check
         run: pnpm run types
 
+      # Build before test so scripts/check-bundle-no-web3.test.ts can grep
+      # dist/server/ for forbidden web3 imports (audit M5 / issue #28).
+      - name: Build
+        run: pnpm run build
+
       - name: Test
         run: pnpm run test
 
