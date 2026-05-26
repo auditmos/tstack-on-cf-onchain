@@ -6,7 +6,7 @@ import { apiHono } from "@/hono/api";
 
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		if (env.DATABASE_HOST) {
+		if (env.DATABASE_HOST && env.DATABASE_USERNAME && env.DATABASE_PASSWORD) {
 			initDatabase({
 				host: env.DATABASE_HOST,
 				username: env.DATABASE_USERNAME,

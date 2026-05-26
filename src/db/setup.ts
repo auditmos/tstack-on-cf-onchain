@@ -11,6 +11,11 @@ interface DbConfig {
 
 export function initDatabase(config: DbConfig) {
 	if (db) return db;
+	if (!config.host || !config.username || !config.password) {
+		throw new Error(
+			"Database init requires non-empty host, username, and password — check that all three secrets are set.",
+		);
+	}
 	const connectionString = `postgres://${config.username}:${config.password}@${config.host}`;
 	db = drizzle(neon(connectionString));
 	return db;
