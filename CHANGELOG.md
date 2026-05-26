@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.6.1...v1.7.0) (2026-05-26)
+
+
+### Features
+
+* **deploy:** add staging/production env blocks and deploy scripts ([#16](https://github.com/auditmos/tstack-on-cf-onchain/issues/16)) ([2a52ca4](https://github.com/auditmos/tstack-on-cf-onchain/commit/2a52ca41cfe57d7df9f0409a267ff9764a457624))
+
 ## [1.6.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.6.0...v1.6.1) (2026-05-26)
 
 
