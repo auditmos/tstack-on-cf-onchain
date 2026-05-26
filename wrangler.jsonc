@@ -1,3 +1,9 @@
+// IMPORTANT:
+// - Secrets: set via `wrangler secret put <NAME>` (or Dashboard > Settings > Variables and Secrets).
+//   Do NOT put secrets in `vars` — they are not encrypted and end up in build output.
+// - Non-secret server config: declare under `vars` here. Browser-exposed config goes through Vite as `VITE_*`.
+// - Per-env overrides (worker name, vars, bindings): declare under `env.staging` / `env.production`.
+//   Env-level fields are NOT inherited from the top level — re-declare every value each env needs.
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "tanstack-start-app",
