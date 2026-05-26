@@ -1,3 +1,10 @@
+## [1.7.5](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.4...v1.7.5) (2026-05-26)
+
+
+### Bug Fixes
+
+* **deps:** remove duplicate @vitest/coverage-v8 key from bumps PR [#33](https://github.com/auditmos/tstack-on-cf-onchain/issues/33) ([a63d220](https://github.com/auditmos/tstack-on-cf-onchain/commit/a63d220b2bc190511c7e4a80956c4ba40d5455af))
+
 ## [1.7.4](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.3...v1.7.4) (2026-05-26)
 
 
