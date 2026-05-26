@@ -28,10 +28,10 @@ const API_BASE = "/api/clients";
 async function fetchClients() {
 	const res = await fetch(API_BASE);
 	if (!res.ok) throw new Error("Failed to fetch clients");
-	return res.json() as Promise<{ data: Client[]; pagination: { total: number } }>;
+	return res.json() as Promise<{ data: Client[]; meta: { total: number } }>;
 }
 
-async function apiCreateClient(data: ClientCreateInput) {
+async function apiCreateClient(data: ClientCreateInput): Promise<Client> {
 	const res = await fetch(API_BASE, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -41,10 +41,14 @@ async function apiCreateClient(data: ClientCreateInput) {
 		const body: { error?: string } = await res.json();
 		throw new Error(body.error || "Failed");
 	}
-	return res.json() as Promise<Client>;
+	const body = (await res.json()) as { data: Client };
+	return body.data;
 }
 
-async function apiUpdateClient({ id, ...data }: { id: string } & Partial<ClientCreateInput>) {
+async function apiUpdateClient({
+	id,
+	...data
+}: { id: string } & Partial<ClientCreateInput>): Promise<Client> {
 	const res = await fetch(`${API_BASE}/${id}`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
@@ -54,7 +58,8 @@ async function apiUpdateClient({ id, ...data }: { id: string } & Partial<ClientC
 		const body: { error?: string } = await res.json();
 		throw new Error(body.error || "Failed to update client");
 	}
-	return res.json() as Promise<Client>;
+	const body = (await res.json()) as { data: Client };
+	return body.data;
 }
 
 async function apiDeleteClient(id: string) {
@@ -143,7 +148,7 @@ export function ClientsPage() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between">
-						<CardTitle>{data ? `${data.pagination.total} clients` : "Clients"}</CardTitle>
+						<CardTitle>{data ? `${data.meta.total} clients` : "Clients"}</CardTitle>
 						<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 							<DialogTrigger asChild>
 								<Button size="sm" onClick={openCreate}>

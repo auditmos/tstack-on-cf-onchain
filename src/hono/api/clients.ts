@@ -27,8 +27,8 @@ clientsEndpoint.get(
 	}),
 	async (c) => {
 		const params = c.req.valid("query");
-		const result = await getClients(params);
-		return c.json(result);
+		const { items, meta } = await getClients(params);
+		return c.json({ data: items, meta });
 	},
 );
 
@@ -45,7 +45,7 @@ clientsEndpoint.get(
 		if (!client) {
 			throw clientNotFound();
 		}
-		return c.json(client);
+		return c.json({ data: client });
 	},
 );
 
@@ -59,7 +59,7 @@ clientsEndpoint.post(
 	async (c) => {
 		const data = c.req.valid("json");
 		const client = await createClient(data);
-		return c.json(client, 201);
+		return c.json({ data: client }, 201);
 	},
 );
 
@@ -82,7 +82,7 @@ clientsEndpoint.put(
 		if (!client) {
 			throw clientNotFound();
 		}
-		return c.json(client);
+		return c.json({ data: client });
 	},
 );
 
@@ -99,7 +99,7 @@ clientsEndpoint.delete(
 		if (!deleted) {
 			throw clientNotFound();
 		}
-		return c.json({ success: true });
+		return c.json({ data: { id } });
 	},
 );
 

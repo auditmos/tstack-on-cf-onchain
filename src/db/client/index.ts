@@ -4,6 +4,7 @@ export type {
 	Client,
 	ClientCreateInput,
 	ClientListResponse,
+	ClientListResult,
 	ClientUpdateInput,
 	PaginationMeta,
 	PaginationRequest,
