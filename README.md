@@ -326,15 +326,13 @@ Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/server.ts",
   "vars": {
-    "CLOUDFLARE_ENV": "dev",
-    "DATABASE_HOST": "",
-    "DATABASE_USERNAME": "",
-    "DATABASE_PASSWORD": ""
+    "CLOUDFLARE_ENV": "dev"
   }
 }
 ```
 
 - Use `wrangler.jsonc` (not `.toml`) for configuration.
+- `vars` is committed — only put **non-secret** config here. DB credentials and any other secrets must be set via `wrangler secret put` (see *Secrets & Environments* below).
 - Prefer `custom_domain: true` over routes with `zone_name` — see `.claude/rules/cloudflare-deployment.md`.
 - Run `pnpm cf-typegen` whenever you add bindings to regenerate `worker-configuration.d.ts`.
 
@@ -372,7 +370,7 @@ You can extend this handler with Queue consumers, scheduled events, or Durable O
 
 ### Secrets & Environments
 
-Worker secrets live in per-environment `.vars` files, never committed:
+**Local dev** — worker secrets live in `.dev.vars` (gitignored, copied from `.example.vars`):
 
 ```bash
 # .dev.vars
@@ -382,7 +380,22 @@ DATABASE_USERNAME="neondb_owner"
 DATABASE_PASSWORD="npg_xxx"
 ```
 
-For staging/production, create `.staging.vars` / `.production.vars` and set the same keys as Cloudflare secrets via `wrangler secret put`. Vite-side variables (`VITE_*`) belong in `.env` / `.env.<mode>` because they're inlined into the browser bundle.
+**Staging / production** — never commit DB credentials to `wrangler.jsonc` `vars` (plaintext, visible in dashboard). Set them as Cloudflare *secrets* via `wrangler secret put`, per environment:
+
+```bash
+# Run once per env to bootstrap each secret. Wrangler prompts for the value.
+wrangler secret put DATABASE_HOST     --env staging
+wrangler secret put DATABASE_USERNAME --env staging
+wrangler secret put DATABASE_PASSWORD --env staging
+
+wrangler secret put DATABASE_HOST     --env production
+wrangler secret put DATABASE_USERNAME --env production
+wrangler secret put DATABASE_PASSWORD --env production
+```
+
+Equivalently via Dashboard: *Workers & Pages → your worker → Settings → Variables and Secrets → Add → type **Secret***. Never use type *Plaintext* for credentials.
+
+Vite-side variables (`VITE_*`) belong in `.env` / `.env.<mode>` because they're inlined into the browser bundle — they're public by construction, so never put secrets there.
 
 ## Database (Neon + Drizzle)
 

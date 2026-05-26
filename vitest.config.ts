@@ -7,5 +7,6 @@ export default defineConfig({
 		globals: true,
 		include: ["src/**/*.test.ts", "src/**/*.test.tsx", "scripts/**/*.test.ts"],
 		exclude: ["src/routes/**"],
+		setupFiles: ["./src/test-setup.ts"],
 	},
 });

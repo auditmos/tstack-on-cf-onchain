@@ -1,7 +1,8 @@
 import { lazy, Suspense, useContext } from "react";
 import { WalletReadyContext } from "@/lib/web3/wallet-ready-context";
 
-const CounterCardLive = lazy(() => import("./counter-card-live"));
+// SSR-gated: see connect-button.tsx for rationale.
+const CounterCardLive = import.meta.env.SSR ? null : lazy(() => import("./counter-card-live"));
 
 function CounterCardPlaceholder() {
 	return <div className="text-muted-foreground">Loading…</div>;
@@ -10,7 +11,7 @@ function CounterCardPlaceholder() {
 export function CounterCard() {
 	const ready = useContext(WalletReadyContext);
 
-	if (!ready) {
+	if (!ready || !CounterCardLive) {
 		return <CounterCardPlaceholder />;
 	}
 

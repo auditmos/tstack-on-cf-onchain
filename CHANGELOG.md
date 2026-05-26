@@ -1,3 +1,53 @@
+## [1.7.4](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.3...v1.7.4) (2026-05-26)
+
+
+### Bug Fixes
+
+* **test:** silence MaxListeners warning from WalletConnect heartbeat ([#32](https://github.com/auditmos/tstack-on-cf-onchain/issues/32)) ([7f4b475](https://github.com/auditmos/tstack-on-cf-onchain/commit/7f4b475758ea7b3c4e768b40c8533cc335d7da69))
+
+## [1.7.3](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.2...v1.7.3) (2026-05-26)
+
+
+### Bug Fixes
+
+* **api:** centralize Hono error handling, stop leaking SQL on 500 ([#19](https://github.com/auditmos/tstack-on-cf-onchain/issues/19)) ([6010bd1](https://github.com/auditmos/tstack-on-cf-onchain/commit/6010bd1e32f3f3d151b12c20b3fde8d7b4b4220d))
+* **api:** unify client response envelopes to { data } / { data, meta } ([#25](https://github.com/auditmos/tstack-on-cf-onchain/issues/25)) ([c71f163](https://github.com/auditmos/tstack-on-cf-onchain/commit/c71f163c0d82b8b63648aec923e26b0c8b428955))
+* **api:** use zValidator on clients routes, return { error, details } shape ([f5d11f6](https://github.com/auditmos/tstack-on-cf-onchain/commit/f5d11f674a0b15ccb83c32eb5a1bad499fa0e15c)), closes [#20](https://github.com/auditmos/tstack-on-cf-onchain/issues/20) [#26](https://github.com/auditmos/tstack-on-cf-onchain/issues/26)
+* **bundle:** gate web3 lazy() with import.meta.env.SSR to drop wagmi from Worker SSR ([#28](https://github.com/auditmos/tstack-on-cf-onchain/issues/28)) ([69d53f9](https://github.com/auditmos/tstack-on-cf-onchain/commit/69d53f9cfed66fe5162ac532db62605aee540e31))
+* **db:** reject partial DB credentials, guard Env type regression ([#22](https://github.com/auditmos/tstack-on-cf-onchain/issues/22)) ([36e1efe](https://github.com/auditmos/tstack-on-cf-onchain/commit/36e1efee6b35e00bede9c105f6b9bb70775964d7))
+* **health:** emit structured log when checkDatabase flips to disconnected ([7869653](https://github.com/auditmos/tstack-on-cf-onchain/commit/7869653ed797301c9734cf47da07d0d438055e58)), closes [#23](https://github.com/auditmos/tstack-on-cf-onchain/issues/23)
+* **logging:** structured JSON in template console calls ([#21](https://github.com/auditmos/tstack-on-cf-onchain/issues/21)) ([0c218a8](https://github.com/auditmos/tstack-on-cf-onchain/commit/0c218a8df4df7c2038ad2d6c533c5b6fb3121af9))
+* **server-fn:** swap .parse to safeParse + AppError in examplefunction template ([#27](https://github.com/auditmos/tstack-on-cf-onchain/issues/27)) ([386b710](https://github.com/auditmos/tstack-on-cf-onchain/commit/386b710298ca041dc320bfea4c424fad7140ac54))
+* **server:** return 503 with structured log when DB env incomplete ([0c3b07e](https://github.com/auditmos/tstack-on-cf-onchain/commit/0c3b07e4c0f0d2f07819639978710bfaf437a38f)), closes [#24](https://github.com/auditmos/tstack-on-cf-onchain/issues/24)
+
+## [1.7.2](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.1...v1.7.2) (2026-05-26)
+
+
+### Bug Fixes
+
+* **cf:** bump compatibility_date + add 180-day freshness test ([#18](https://github.com/auditmos/tstack-on-cf-onchain/issues/18)) ([3751fb9](https://github.com/auditmos/tstack-on-cf-onchain/commit/3751fb9c5324a7a50ba766ec40de652f886ced49))
+
+## [1.7.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.0...v1.7.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **observability:** enable Workers Logs at top-level wrangler config ([#17](https://github.com/auditmos/tstack-on-cf-onchain/issues/17)) ([591049d](https://github.com/auditmos/tstack-on-cf-onchain/commit/591049de1fe9b00148fd2bfe0464861137441b72))
+
+# [1.7.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.6.1...v1.7.0) (2026-05-26)
+
+
+### Features
+
+* **deploy:** add staging/production env blocks and deploy scripts ([#16](https://github.com/auditmos/tstack-on-cf-onchain/issues/16)) ([2a52ca4](https://github.com/auditmos/tstack-on-cf-onchain/commit/2a52ca41cfe57d7df9f0409a267ff9764a457624))
+
+## [1.6.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.6.0...v1.6.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **security:** stop declaring DB credentials as wrangler vars ([#15](https://github.com/auditmos/tstack-on-cf-onchain/issues/15)) ([e9c5c6f](https://github.com/auditmos/tstack-on-cf-onchain/commit/e9c5c6f0bbdc9040ad8fff1236c52c8cd3664d12))
+
 # [1.6.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.5.0...v1.6.0) (2026-05-05)
 
 

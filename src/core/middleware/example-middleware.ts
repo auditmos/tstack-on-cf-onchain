@@ -4,7 +4,7 @@ export const exampleMiddlewareWithContext = createMiddleware({
 	type: "function",
 }).server(async ({ next }) => {
 	// biome-ignore lint/suspicious/noConsole: demo logs for middleware execution flow
-	console.log("Executing exampleMiddlewareWithContext");
+	console.log(JSON.stringify({ msg: "example middleware invoked" }));
 	return await next({
 		context: {
 			data: "Some Data From Middleware",

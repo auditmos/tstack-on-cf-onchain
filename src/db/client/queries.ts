@@ -3,7 +3,7 @@ import { getDb } from "@/db/setup";
 import type {
 	Client,
 	ClientCreateInput,
-	ClientListResponse,
+	ClientListResult,
 	ClientUpdateInput,
 	PaginationRequest,
 } from "./schema";
@@ -15,20 +15,20 @@ export async function getClient(clientId: string): Promise<Client | null> {
 	return result[0] ?? null;
 }
 
-export async function getClients(params: PaginationRequest): Promise<ClientListResponse> {
+export async function getClients(params: PaginationRequest): Promise<ClientListResult> {
 	const db = getDb();
-	const [data, countResult] = await Promise.all([
+	const [items, countResult] = await Promise.all([
 		db.select().from(clients).limit(params.limit).offset(params.offset),
 		db.select({ total: count() }).from(clients),
 	]);
 	const total = countResult[0]?.total ?? 0;
 	return {
-		data,
-		pagination: {
+		items,
+		meta: {
 			total,
 			limit: params.limit,
 			offset: params.offset,
-			hasMore: params.offset + data.length < total,
+			hasMore: params.offset + items.length < total,
 		},
 	};
 }

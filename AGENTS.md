@@ -62,7 +62,9 @@ All commands run via `pnpm`. Pick the smallest set you need — do not run every
 - `pnpm dev` — dev server on port 3000 (also auto-regenerates `routeTree.gen.ts`)
 - `pnpm build` — production build (runs `contracts:build` + `contracts:typegen` first via `prebuild`)
 - `pnpm serve` — preview production build
-- `pnpm deploy` — build + `wrangler deploy`
+- `pnpm deploy` — build + `wrangler deploy` (top-level env, no `--mode`)
+- `pnpm build:{staging,production}` — `cross-env CLOUDFLARE_ENV={env} vite build` (the plugin reads `CLOUDFLARE_ENV` to flatten `env.{env}` from `wrangler.jsonc` into `dist/server/wrangler.json`)
+- `pnpm deploy:{staging,production}` — `build:{env}` then `wrangler deploy` (no `--env` flag — env is already baked into the built manifest)
 - `pnpm cf-typegen` — regenerate `worker-configuration.d.ts` from `wrangler.jsonc`
 
 **Test / type / lint**
@@ -205,7 +207,9 @@ Full notes: `@.claude/rules/frontend/ui.md` (semantic classes, anti-patterns, la
 - Use `wrangler.jsonc`, never `wrangler.toml`. Workers are stateless — no global mutable state. Use `ctx.waitUntil()` for non-blocking work after the response.
 - Prefer `routes: [{ pattern, custom_domain: true }]` over `routes` with `zone_name` (auto-creates DNS + SSL).
 - **HTTPS gotcha**: never enable Cloudflare's "Redirect from HTTP to HTTPS" template — it intercepts before Workers and causes 301 self-loops. Use SSL/TLS → Edge Certificates → "Always Use HTTPS" instead. Zone SSL/TLS mode MUST be Full or Full (strict).
-- Vite plugin: `vite build --mode <env>` bakes env config; deploy via `wrangler deploy --env=''`. Secrets via `.dev.vars` (gitignored) or Cloudflare dashboard.
+- Per-env config lives under `env.{staging,production}` in `wrangler.jsonc` (distinct `name`, `vars`, `observability`). **Env-level `vars` / bindings are NOT inherited from top-level** — re-declare anything the env needs.
+- **Env selection mechanism**: the Cloudflare Vite plugin reads `process.env.CLOUDFLARE_ENV` at build time and flattens the matching `env.<name>` block into `dist/server/wrangler.json`. `vite build --mode <env>` alone does NOT pick the env — `--mode` only switches Vite's `import.meta.env.MODE` / `.env.<mode>` loading. Use `cross-env CLOUDFLARE_ENV=<env> vite build`.
+- **`wrangler deploy --env <name>` is NOT applicable with this plugin** — the deploy reads the already-flattened `dist/server/wrangler.json`. Just run `wrangler deploy` after the env-scoped build. Secrets via `wrangler secret put --env <env>` (CF dashboard) or `.dev.vars` (local dev only, gitignored).
 
 Full notes (incl. "Too Many Redirects" debugging recipe): `@.claude/rules/cloudflare-deployment.md`, `@.claude/rules/api/cloudflare-workers.md`
 </important>

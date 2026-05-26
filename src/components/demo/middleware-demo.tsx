@@ -14,11 +14,16 @@ export function MiddlewareDemo() {
 		mutationFn: examplefunction,
 		onSuccess: (data) => {
 			// biome-ignore lint/suspicious/noConsole: demo logs for server function execution flow
-			console.log("Client: Server function executed successfully:", data);
+			console.log(JSON.stringify({ msg: "client: server function succeeded", data }));
 		},
 		onError: (error) => {
 			// biome-ignore lint/suspicious/noConsole: demo logs for server function execution flow
-			console.error("Client: Server function failed:", error);
+			console.error(
+				JSON.stringify({
+					msg: "client: server function failed",
+					error: error instanceof Error ? error.message : String(error),
+				}),
+			);
 		},
 	});
 

@@ -10,7 +10,11 @@
 		"dev": "vite dev --port 3000",
 		"prebuild": "pnpm contracts:build && pnpm contracts:typegen",
 		"build": "vite build",
+		"build:staging": "cross-env CLOUDFLARE_ENV=staging vite build",
+		"build:production": "cross-env CLOUDFLARE_ENV=production vite build",
 		"deploy": "pnpm run build && wrangler deploy",
+		"deploy:staging": "pnpm run build:staging && wrangler deploy",
+		"deploy:production": "pnpm run build:production && wrangler deploy",
 		"serve": "vite preview",
 		"cf-typegen": "wrangler types --env-interface BaseEnv",
 		"test": "vitest run",
@@ -49,6 +53,7 @@
 		"contracts:deploy:mainnet": "dotenvx run -f contracts/.env -- forge script --root contracts DeployCounter --rpc-url mainnet --broadcast"
 	},
 	"dependencies": {
+		"@hono/zod-validator": "^0.8.0",
 		"@neondatabase/serverless": "^1.1.0",
 		"@radix-ui/react-collapsible": "^1.1.12",
 		"@radix-ui/react-dialog": "^1.1.15",
@@ -92,6 +97,8 @@
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^4.7.0",
 		"@vitest/coverage-v8": "^4.1.7",
+		"@vitest/coverage-v8": "^4.1.6",
+		"cross-env": "^10.1.0",
 		"drizzle-kit": "^0.31.10",
 		"jsdom": "^26.1.0",
 		"knip": "^6.14.2",
