@@ -1,3 +1,10 @@
+## [1.7.6](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.5...v1.7.6) (2026-07-22)
+
+
+### Bug Fixes
+
+* **knip:** ignore the anvil binary so deps-update stops failing ([643ef5d](https://github.com/auditmos/tstack-on-cf-onchain/commit/643ef5dc3f1c38bfac302b172cc024db4333dc2e))
+
 ## [1.7.5](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.4...v1.7.5) (2026-05-26)
 
 
