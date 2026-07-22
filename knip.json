@@ -8,6 +8,6 @@
 		"drizzle-*.config.ts"
 	],
 	"ignoreDependencies": ["@tanstack/react-form", "web-vitals"],
-	"ignoreBinaries": ["forge"],
+	"ignoreBinaries": ["forge", "anvil"],
 	"ignore": ["src/components/ui/**", "src/core/errors.ts", "src/db/**"]
 }
