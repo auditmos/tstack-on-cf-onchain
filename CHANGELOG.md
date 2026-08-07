@@ -1,3 +1,10 @@
+## [1.7.7](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.6...v1.7.7) (2026-08-07)
+
+
+### Bug Fixes
+
+* **worker:** extract request admission, fail-open by default for DB-dependent routes ([f9db316](https://github.com/auditmos/tstack-on-cf-onchain/commit/f9db3167d978961e2ebcb48c315730057a02525a)), closes [#43](https://github.com/auditmos/tstack-on-cf-onchain/issues/43)
+
 ## [1.7.6](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.5...v1.7.6) (2026-07-22)
 
 
