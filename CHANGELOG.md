@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.8.0...v1.8.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **deploy:** apply pending migrations before production build+deploy ([2b46e62](https://github.com/auditmos/tstack-on-cf-onchain/commit/2b46e621e0f979cc0b4eae5b70524f1d695057a7)), closes [#48](https://github.com/auditmos/tstack-on-cf-onchain/issues/48)
+
 # [1.8.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.10...v1.8.0) (2026-08-07)
 
 
