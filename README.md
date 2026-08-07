@@ -73,7 +73,7 @@ VITE_CHAIN_ID=31337                       # 1 = mainnet, 11155111 = sepolia, 313
 VITE_WALLETCONNECT_PROJECT_ID=""          # https://cloud.walletconnect.com
 ```
 
-The DB is only initialised when `DATABASE_HOST` is set, so the template runs fully on-chain without a Postgres instance.
+The DB is only initialised when the database secrets are set. Leave them blank and the template runs fully on-chain without a Postgres instance: liveness, chain-only pages, and any route that doesn't declare a database dependency all serve traffic normally — only DB-backed routes (e.g. `/api/clients`) respond with 503 until you configure Neon. See *Custom Server Entry* below.
 
 ## Scripts
 
@@ -338,22 +338,17 @@ Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.
 
 ### Custom Server Entry (`src/server.ts`)
 
-One fetch handler owns the entire worker: it boots the DB once per isolate (only when `DATABASE_HOST` is set) and dispatches to Hono or TanStack Start.
+One fetch handler owns the entire worker. It delegates the DB-secrets/routing decision to `admitRequest()` (`src/core/request-admission.ts`) and dispatches to Hono or TanStack Start.
 
 ```ts
 import handler from "@tanstack/react-start/server-entry";
-import { initDatabase } from "@/db";
+import { admitRequest } from "@/core/request-admission";
 import { apiHono } from "@/hono/api";
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    if (env.DATABASE_HOST) {
-      initDatabase({
-        host: env.DATABASE_HOST,
-        username: env.DATABASE_USERNAME,
-        password: env.DATABASE_PASSWORD,
-      });
-    }
+    const admission = admitRequest(request, env);
+    if (!admission.admitted) return admission.response;
 
     const url = new URL(request.url);
 
@@ -365,6 +360,8 @@ export default {
   },
 };
 ```
+
+`admitRequest()` is a deep module: it hides secret inspection, the list of database-dependent routes, the 503 error shape, and the boot-failure log behind one decision. Routes declare whether they need a database by being listed there — **the default is that they don't**, so with no DB secrets configured only DB-backed routes (e.g. `/api/clients`, `/api/health/ready`) return 503; liveness and all server-rendered pages behave normally. See `src/core/request-admission.test.ts` for the full behavior matrix.
 
 You can extend this handler with Queue consumers, scheduled events, or Durable Object bindings as your project grows.
 
@@ -409,7 +406,7 @@ src/db/client/
 └── index.ts      # Public re-exports
 ```
 
-- `initDatabase()` is called once per Worker isolate from `src/server.ts`.
+- `initDatabase()` is called once per Worker isolate, from `admitRequest()` (`src/core/request-admission.ts`) via `src/server.ts`.
 - Every query calls `getDb()` — never pass the DB as a parameter.
 - Inputs are validated with Zod at the API boundary; mutations use `.returning()` to avoid extra round trips.
 

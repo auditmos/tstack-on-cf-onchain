@@ -7,7 +7,7 @@
 // plaintext `vars`). They are bootstrapped per-env via `wrangler secret put`
 // (see README → Secrets & Environments) and declared here so TS sees them.
 interface Env extends BaseEnv {
-	DATABASE_HOST: string;
-	DATABASE_USERNAME: string;
-	DATABASE_PASSWORD: string;
+	DATABASE_HOST?: string;
+	DATABASE_USERNAME?: string;
+	DATABASE_PASSWORD?: string;
 }

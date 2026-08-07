@@ -23,81 +23,40 @@ function buildEnv(overrides: Partial<Env> = {}): Env {
 	} as Env;
 }
 
-describe("worker entry — DB env validation", () => {
-	it("returns 503 on /api/* when DATABASE_HOST is empty", async () => {
-		const res = await worker.fetch(
-			new Request("http://test/api/health/live"),
-			buildEnv({ DATABASE_HOST: "" }),
-			ctxStub,
-		);
-		expect(res.status).toBe(503);
+const noDbEnv = buildEnv({ DATABASE_HOST: "", DATABASE_USERNAME: "", DATABASE_PASSWORD: "" });
+
+// Granular admission-decision behavior (which routes need a DB, missing-var
+// logging, etc.) is exercised directly against src/core/request-admission.ts.
+// These tests only confirm the worker entry wires that decision through.
+describe("worker entry — chain-only mode (no DB secrets)", () => {
+	it("serves liveness normally", async () => {
+		const res = await worker.fetch(new Request("http://test/api/health/live"), noDbEnv, ctxStub);
+		expect(res.status).toBe(200);
 	});
 
-	it("503 response body is JSON { error }", async () => {
-		const res = await worker.fetch(
-			new Request("http://test/api/health/live"),
-			buildEnv({ DATABASE_HOST: "" }),
-			ctxStub,
-		);
+	it("returns the admission module's 503 for a database-backed endpoint", async () => {
+		const res = await worker.fetch(new Request("http://test/api/clients"), noDbEnv, ctxStub);
+		expect(res.status).toBe(503);
 		expect(res.headers.get("content-type")).toContain("application/json");
 		const body = (await res.json()) as { error: string };
 		expect(body.error).toMatch(/unavailable/i);
 	});
 
-	it("missing DATABASE_USERNAME alone produces 503 and names just that var", async () => {
-		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-		const res = await worker.fetch(
-			new Request("http://test/api/clients"),
-			buildEnv({ DATABASE_USERNAME: "" }),
-			ctxStub,
-		);
-
-		expect(res.status).toBe(503);
-		const logged = String(consoleSpy.mock.calls[0]?.[0]);
-		const parsed = JSON.parse(logged) as { missing: string[] };
-		expect(parsed.missing).toEqual(["DATABASE_USERNAME"]);
-
-		consoleSpy.mockRestore();
+	it("serves a server-rendered page normally", async () => {
+		const res = await worker.fetch(new Request("http://test/dashboard"), noDbEnv, ctxStub);
+		expect(res.status).toBe(200);
 	});
+});
 
-	it("missing DATABASE_PASSWORD alone produces 503 and names just that var", async () => {
-		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-		const res = await worker.fetch(
-			new Request("http://test/api/clients"),
-			buildEnv({ DATABASE_PASSWORD: "" }),
-			ctxStub,
-		);
-
-		expect(res.status).toBe(503);
-		const logged = String(consoleSpy.mock.calls[0]?.[0]);
-		const parsed = JSON.parse(logged) as { missing: string[] };
-		expect(parsed.missing).toEqual(["DATABASE_PASSWORD"]);
-
-		consoleSpy.mockRestore();
-	});
-
-	it("logs structured { msg, missing } JSON line on incomplete env", async () => {
-		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-		await worker.fetch(
-			new Request("http://test/api/health/live"),
-			buildEnv({ DATABASE_HOST: "" }),
-			ctxStub,
-		);
-
-		expect(consoleSpy).toHaveBeenCalledTimes(1);
-		const logged = String(consoleSpy.mock.calls[0]?.[0]);
-		const parsed = JSON.parse(logged) as { msg: string; missing: string[] };
-		expect(parsed.msg).toBe("db_env_incomplete");
-		expect(parsed.missing).toEqual(["DATABASE_HOST"]);
-
-		consoleSpy.mockRestore();
-	});
-
-	it("with all DB env set, /api/health/live proceeds (200, not 503)", async () => {
+describe("worker entry — DB secrets fully present", () => {
+	it("routes /api/* to Hono as before", async () => {
 		const res = await worker.fetch(new Request("http://test/api/health/live"), buildEnv(), ctxStub);
 		expect(res.status).toBe(200);
+	});
+
+	it("routes everything else to TanStack Start as before", async () => {
+		const res = await worker.fetch(new Request("http://test/dashboard"), buildEnv(), ctxStub);
+		expect(res.status).toBe(200);
+		expect(await res.text()).toBe("tanstack");
 	});
 });
