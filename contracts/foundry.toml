@@ -2,6 +2,9 @@
 src = "src"
 out = "out"
 libs = ["dependencies"]
+solc = "0.8.28"
+auto_detect_solc = false
+evm_version = "paris"
 fs_permissions = [
     { access = "read-write", path = "./deployments" },
     { access = "read-write", path = "./test/tmp" },
