@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.8.1...v1.9.0) (2026-08-07)
+
+
+### Features
+
+* **ci:** add scheduled majors report ([61db9d2](https://github.com/auditmos/tstack-on-cf-onchain/commit/61db9d2961490f6d5bb1cf16bb2cf6ed7c4d1df8)), closes [#50](https://github.com/auditmos/tstack-on-cf-onchain/issues/50)
+
 ## [1.8.1](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.8.0...v1.8.1) (2026-08-07)
 
 
