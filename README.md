@@ -93,7 +93,9 @@ The DB is only initialised when the database secrets are set. Leave them blank a
 | `pnpm db:pull:{dev,staging,production}` | Pull schema from existing DB |
 | `pnpm db:studio` | Open Drizzle Studio against dev |
 | `pnpm db:seed:{dev,staging,production}` | Run `scripts/seed.ts` against each env |
-| `pnpm deps` / `pnpm deps:update` | Check / apply dependency updates via taze |
+| `pnpm deps` / `pnpm deps:update` | Check / apply minor+patch dependency updates via taze |
+| `pnpm deps:major` / `pnpm deps:major:update` | Check / apply major dependency updates via taze (review breaking changes first) |
+| `pnpm majors:report` | Open/update the tracked "Available major dependency upgrades" issue (also runs weekly via `majors-report.yml`) |
 | `pnpm release` | semantic-release |
 | `pnpm contracts:build` / `pnpm contracts:test` | `forge build` / `forge test` |
 | `pnpm contracts:typegen` | Generate `as const` ABI + typed addresses into `src/contracts/` |

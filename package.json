@@ -31,6 +31,7 @@
 		"deps:update": "taze -r -w",
 		"deps:major": "taze -r major",
 		"deps:major:update": "taze -r major -w",
+		"majors:report": "tsx scripts/majors-report.ts",
 		"db:generate:dev": "dotenvx run -f .dev.vars -- drizzle-kit generate --config drizzle-dev.config.ts",
 		"db:generate:staging": "dotenvx run -f .staging.vars -- drizzle-kit generate --config drizzle-staging.config.ts",
 		"db:generate:production": "dotenvx run -f .production.vars -- drizzle-kit generate --config drizzle-production.config.ts",

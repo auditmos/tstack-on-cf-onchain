@@ -1,0 +1,46 @@
+name: Majors report
+
+on:
+  schedule:
+    # Monday 08:00 UTC (after deps-update.yml at 06:00 and compat-date.yml at 07:00,
+    # so the majors it lists reflect the same week's minor+patch bump).
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: majors-report
+  cancel-in-progress: false
+
+env:
+  # Future-proof: opt into Node 24 for JS actions before GH forces it (2026-06-02 default, 2026-09-16 hard cutoff)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  report:
+    name: Open or update the tracked majors issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Report available majors
+        run: pnpm run majors:report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
