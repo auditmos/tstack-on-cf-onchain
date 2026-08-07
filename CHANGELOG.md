@@ -1,3 +1,10 @@
+## [1.7.10](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.9...v1.7.10) (2026-08-07)
+
+
+### Bug Fixes
+
+* **web3:** surface transaction errors in the counter demo ([2d66661](https://github.com/auditmos/tstack-on-cf-onchain/commit/2d66661c4489c781244d5b5ea7ae63d2daf50d77)), closes [#46](https://github.com/auditmos/tstack-on-cf-onchain/issues/46)
+
 ## [1.7.9](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.8...v1.7.9) (2026-08-07)
 
 
