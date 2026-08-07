@@ -186,6 +186,33 @@ Path alias `@/*` resolves to `src/*`.
 | Release | semantic-release |
 | Package manager | pnpm 10 |
 
+## Dependency Policy
+
+Two majors are deliberately frozen. `pnpm majors:report` (see [Scripts](#scripts)) tracks both until either decision below changes.
+
+### wagmi 3 — staying on wagmi 2 for now
+
+wagmi 3.7.6 is out, but this template's wallet-connection layer is ConnectKit, and ConnectKit's only released version (`1.9.2`, published 2026-03-24) peer-pins `wagmi` to `2.x` — installing wagmi 3 alongside it breaks at package resolution, not just at the type level. ConnectKit's maintainers have an upgrade in progress ([family/connectkit#514](https://github.com/family/connectkit/pull/514), "ConnectKit 2.0: wagmi v3 upgrade with per-connector entry points", opened 2026-07-26), but it is still open and unmerged — manual QA is outstanding and it's blocked on an upstream `@aave/account` dependency needing its own release before ConnectKit 2.0 can ship.
+
+**Decision: stay on wagmi 2 + ConnectKit 1.9.2.** Revisit once ConnectKit publishes a release with a `wagmi: 3.x` peer dependency. Migrating wagmi alone would mean dropping ConnectKit for a different connector UI — a much larger change than this freeze is worth pre-empting.
+
+### vite 8 — pin stays, blocked on `@vitejs/plugin-react`
+
+`vite` (`7.1.2`) is the manifest's only exact dependency pin, with vite `8.2.1` out. Verified against the packages actually in this build:
+
+| Package | Current | vite 8 peer support |
+|---|---|---|
+| `@cloudflare/vite-plugin` | `^1.50.0` | yes — `^6.1.0 \|\| ^7.0.0 \|\| ^8.0.0` |
+| `@tanstack/react-start` | `^1.168.34` | yes — `>=7.0.0` (no upper bound) |
+| `vite-tsconfig-paths` | `^5.1.4` | yes — `*` |
+| `@tailwindcss/vite` | `^4.3.3` | yes — `^5.2.0 \|\| ^6 \|\| ^7 \|\| ^8` |
+| `vitest` | `^4.1.10` | yes — `^6.0.0 \|\| ^7.0.0 \|\| ^8.0.0` |
+| `@vitejs/plugin-react` | `^4.7.0` | **no** — `^4.2.0 \|\| ^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0`, tops out at vite 7 |
+
+Every load-bearing plugin and the framework itself already support vite 8, except `@vitejs/plugin-react`: its current major (`4.x`) has no vite 8 support. The first line that adds it is `@vitejs/plugin-react@5.x` — itself a separate major upgrade (its own entry in `pnpm majors:report`'s output).
+
+**Decision: keep the pin.** Lifting it cleanly would require bumping `@vitejs/plugin-react` across a major too, which is a second, unscoped migration — out of bounds for what should be a one-line pin lift. Reason recorded here and next to the pin in `vite.config.ts`; revisit when `@vitejs/plugin-react` 5.x is picked up.
+
 ## Web3 / EVM Integration
 
 The on-chain stack is structured as deep modules, with the wagmi/ConnectKit provider isolated behind a tiny SSR-safe shell so the worker bundle stays lean and hydration is always correct.
