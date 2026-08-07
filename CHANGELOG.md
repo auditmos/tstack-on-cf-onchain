@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.10...v1.8.0) (2026-08-07)
+
+
+### Features
+
+* **web3:** per-chain RPC endpoint override with ordered fallback ([4d8581d](https://github.com/auditmos/tstack-on-cf-onchain/commit/4d8581d1a5cc83ea09ed05d11fecc2cadb41fd5b)), closes [#47](https://github.com/auditmos/tstack-on-cf-onchain/issues/47)
+
 ## [1.7.10](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.9...v1.7.10) (2026-08-07)
 
 
