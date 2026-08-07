@@ -3,7 +3,9 @@
 //   Do NOT put secrets in `vars` — they are not encrypted and end up in build output.
 // - Non-secret server config: declare under `vars` here. Browser-exposed config goes through Vite as `VITE_*`.
 // - Per-env overrides (worker name, vars, bindings): declare under `env.staging` / `env.production`.
-//   Env-level fields are NOT inherited from the top level — re-declare every value each env needs.
+//   Env-level fields are NOT inherited from the top level — re-declare every value each env needs
+//   (including upload_source_maps, placement, and observability — verify in dist/server/wrangler.json
+//   after building, since a value present only in source and not in the built manifest is not enabled).
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "tanstack-start-app",
@@ -13,8 +15,11 @@
 	"vars": {
 		"CLOUDFLARE_ENV": "dev"
 	},
+	// Stack traces point at original source instead of an offset into the minified bundle.
+	"upload_source_maps": true,
 	"observability": {
 		"enabled": true,
+		// Dev is low-traffic and actively debugged — log everything.
 		"logs": { "head_sampling_rate": 1 }
 	},
 	"env": {
@@ -23,8 +28,12 @@
 			"vars": {
 				"CLOUDFLARE_ENV": "staging"
 			},
+			"upload_source_maps": true,
+			// Runs near the single-region Neon database it round-trips to on every request.
+			"placement": { "mode": "smart" },
 			"observability": {
 				"enabled": true,
+				// Staging has staging-sized traffic and exists to catch bugs before prod — log everything.
 				"logs": { "head_sampling_rate": 1 }
 			}
 		},
@@ -33,9 +42,14 @@
 			"vars": {
 				"CLOUDFLARE_ENV": "production"
 			},
+			"upload_source_maps": true,
+			// Runs near the single-region Neon database it round-trips to on every request.
+			"placement": { "mode": "smart" },
 			"observability": {
 				"enabled": true,
-				"logs": { "head_sampling_rate": 1 }
+				// Production traffic volume makes 100% sampling costly; 10% is enough signal for
+				// error-rate and latency trends without paying to log every request.
+				"logs": { "head_sampling_rate": 0.1 }
 			}
 		}
 	}

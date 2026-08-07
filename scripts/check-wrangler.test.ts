@@ -12,6 +12,8 @@ type WranglerEnv = {
 		enabled?: boolean;
 		logs?: { head_sampling_rate?: number };
 	};
+	upload_source_maps?: boolean;
+	placement?: { mode?: string };
 };
 
 type WranglerConfig = {
@@ -21,6 +23,8 @@ type WranglerConfig = {
 		enabled?: boolean;
 		logs?: { head_sampling_rate?: number };
 	};
+	upload_source_maps?: boolean;
+	placement?: { mode?: string };
 };
 
 function readWranglerConfig(): WranglerConfig {
@@ -33,6 +37,18 @@ function readPackageScripts(): Record<string, string> {
 	const path = resolve(import.meta.dirname, "..", "package.json");
 	const pkg = JSON.parse(readFileSync(path, "utf8")) as { scripts?: Record<string, string> };
 	return pkg.scripts ?? {};
+}
+
+function readWranglerSource(): string {
+	const path = resolve(import.meta.dirname, "..", "wrangler.jsonc");
+	return readFileSync(path, "utf8");
+}
+
+function lineWithComment(source: string, needle: string): string {
+	const lines = source.split("\n");
+	const idx = lines.findIndex((line) => line.includes(needle));
+	if (idx === -1) return "";
+	return [lines[idx - 1], lines[idx], lines[idx + 1]].join("\n");
 }
 
 describe("wrangler.jsonc multi-env configuration", () => {
@@ -63,10 +79,9 @@ describe("wrangler.jsonc multi-env configuration", () => {
 	});
 
 	for (const envName of ["staging", "production"] as const) {
-		it(`enables observability with head_sampling_rate=1 in env.${envName}`, () => {
+		it(`enables observability in env.${envName}`, () => {
 			const env = envs[envName];
 			expect(env?.observability?.enabled).toBe(true);
-			expect(env?.observability?.logs?.head_sampling_rate).toBe(1);
 		});
 
 		it(`declares its own vars.CLOUDFLARE_ENV in env.${envName} (env-level vars are not inherited)`, () => {
@@ -74,6 +89,52 @@ describe("wrangler.jsonc multi-env configuration", () => {
 			expect(env?.vars?.CLOUDFLARE_ENV).toBe(envName);
 		});
 	}
+
+	it("declares upload_source_maps=true at the top level so dev stack traces point at original source", () => {
+		expect(config.upload_source_maps).toBe(true);
+	});
+
+	for (const envName of ["staging", "production"] as const) {
+		it(`redeclares upload_source_maps=true in env.${envName} (env-level fields are not inherited)`, () => {
+			expect(envs[envName]?.upload_source_maps).toBe(true);
+		});
+	}
+
+	it("enables Smart Placement (placement.mode = smart) in env.production so the Worker runs near its single-region database", () => {
+		expect(envs.production?.placement?.mode).toBe("smart");
+	});
+
+	it("staging and production log-sampling values differ deliberately, not by accident", () => {
+		const stagingRate = envs.staging?.observability?.logs?.head_sampling_rate;
+		const productionRate = envs.production?.observability?.logs?.head_sampling_rate;
+		expect(typeof stagingRate).toBe("number");
+		expect(typeof productionRate).toBe("number");
+		expect(stagingRate).not.toBe(productionRate);
+	});
+
+	describe("log-sampling rationale comments", () => {
+		const source = readWranglerSource();
+
+		it("explains the top-level (dev) head_sampling_rate value with a nearby comment", () => {
+			const context = lineWithComment(source, '"head_sampling_rate": 1').split("\n")[0] ?? "";
+			expect(context.trim()).toMatch(/^\/\//);
+		});
+
+		for (const envName of ["staging", "production"] as const) {
+			it(`explains env.${envName}'s head_sampling_rate value with a nearby comment`, () => {
+				const rate = envs[envName]?.observability?.logs?.head_sampling_rate;
+				const occurrences = source
+					.split("\n")
+					.map((line, idx) => ({ line, idx }))
+					.filter(({ line }) => line.includes(`"head_sampling_rate": ${rate}`));
+				const hasCommentedOccurrence = occurrences.some(({ idx }) => {
+					const prevLine = source.split("\n")[idx - 1] ?? "";
+					return prevLine.trim().startsWith("//");
+				});
+				expect(hasCommentedOccurrence).toBe(true);
+			});
+		}
+	});
 });
 
 describe("package.json multi-env deploy scripts", () => {
