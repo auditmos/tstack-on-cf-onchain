@@ -14,7 +14,7 @@
 		"build:production": "cross-env CLOUDFLARE_ENV=production vite build",
 		"deploy": "pnpm run build && wrangler deploy",
 		"deploy:staging": "pnpm run build:staging && wrangler deploy",
-		"deploy:production": "pnpm run build:production && wrangler deploy",
+		"deploy:production": "pnpm run db:migrate:production && pnpm run build:production && wrangler deploy",
 		"serve": "vite preview",
 		"cf-typegen": "wrangler types --env-interface BaseEnv",
 		"test": "vitest run",

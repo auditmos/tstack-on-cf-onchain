@@ -158,3 +158,23 @@ describe("package.json multi-env deploy scripts", () => {
 		});
 	}
 });
+
+describe("deploy:production migration ordering (issue #48)", () => {
+	const scripts = readPackageScripts();
+	const cmd = scripts["deploy:production"];
+
+	it("applies pending migrations, then builds, then deploys, in that order", () => {
+		expect(cmd).toBeDefined();
+		const migrateIdx = cmd.indexOf("db:migrate:production");
+		const buildIdx = cmd.indexOf("build:production");
+		const deployIdx = cmd.indexOf("wrangler deploy");
+
+		expect(migrateIdx).toBeGreaterThanOrEqual(0);
+		expect(buildIdx).toBeGreaterThan(migrateIdx);
+		expect(deployIdx).toBeGreaterThan(buildIdx);
+	});
+
+	it("stays a manual, single command — no pipeline or CI trigger appended", () => {
+		expect(cmd).not.toMatch(/gh\s|curl\s|workflow_dispatch/);
+	});
+});

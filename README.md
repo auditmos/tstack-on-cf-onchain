@@ -448,6 +448,20 @@ pnpm db:studio
 
 Per-env configs (`drizzle-dev.config.ts`, `drizzle-staging.config.ts`, `drizzle-production.config.ts`) all point at `src/db/schema.ts` but write migrations to separate directories, allowing independent migration tracking per environment.
 
+#### First-time bootstrap for staging/production
+
+Only `src/db/migrations/dev/` is committed today — `staging` and `production` have no migration history yet, so the first deploy to either needs one extra step before it behaves like `dev`:
+
+1. Provision a real Neon database for that environment and fill `DATABASE_HOST`/`DATABASE_USERNAME`/`DATABASE_PASSWORD` in `.staging.vars` / `.production.vars`.
+2. Run `pnpm db:generate:staging` / `pnpm db:generate:production` once — this reads `src/db/schema.ts` against an empty migration history and writes the initial `0000_*.sql`, creating `src/db/migrations/{staging,production}/`.
+3. From then on, `pnpm db:migrate:{env}` (or `pnpm deploy:production`, which now runs it automatically — see below) applies whatever is pending.
+
+**Gotcha:** `drizzle-kit`'s `generate`/`migrate` commands in this repo auto-select the `@neondatabase/serverless` driver (it's already a dependency), which only speaks Neon's websocket protocol. A generic local/Docker Postgres will fail with `can only connect to remote Neon/Vercel Postgres/Supabase instances through a websocket` — bootstrapping staging/production genuinely requires a reachable Neon endpoint, not a local stand-in.
+
+#### Production deploy applies pending migrations first
+
+`pnpm deploy:production` sequences `db:migrate:production` → `build:production` → `wrangler deploy`, so new code can never reach traffic against an un-migrated schema. Ordering is enforced by the command, not by memory. Deployment is still a manual command a person runs — this doesn't add a pipeline, a build-service connection, or an approval gate.
+
 ## REST API with Hono
 
 All `/api/*` routes are handled by Hono. Endpoints live in `src/hono/api/` and are mounted in `src/hono/api.ts`.
