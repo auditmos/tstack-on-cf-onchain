@@ -1,3 +1,10 @@
+## [1.7.9](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.8...v1.7.9) (2026-08-07)
+
+
+### Bug Fixes
+
+* **cloudflare:** enable source-map upload, Smart Placement, deliberate log sampling ([418e7db](https://github.com/auditmos/tstack-on-cf-onchain/commit/418e7dbe600414f8174ceccefaa9902d139b7bbc)), closes [#45](https://github.com/auditmos/tstack-on-cf-onchain/issues/45)
+
 ## [1.7.8](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.7...v1.7.8) (2026-08-07)
 
 
