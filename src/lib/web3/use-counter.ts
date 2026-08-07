@@ -10,14 +10,25 @@ interface UseCounterResult {
 	hasAddress: boolean;
 	isConnected: boolean;
 	isInFlight: boolean;
+	error: Error | undefined;
 	increment: () => void;
 }
 
 export function useCounter(): UseCounterResult {
 	const address = getContractAddress(activeChain.id, "Counter");
 	const { isConnected } = useAccount();
-	const { writeContract, data: txHash, isPending: isWritePending } = useWriteContract();
-	const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+	const {
+		writeContract,
+		data: txHash,
+		isPending: isWritePending,
+		error: writeError,
+		reset: resetWrite,
+	} = useWriteContract();
+	const {
+		isLoading: isConfirming,
+		isSuccess: isConfirmed,
+		error: receiptError,
+	} = useWaitForTransactionReceipt({
 		hash: txHash,
 	});
 
@@ -36,6 +47,7 @@ export function useCounter(): UseCounterResult {
 
 	const increment = () => {
 		if (!address) return;
+		resetWrite();
 		writeContract({
 			abi: counterAbi,
 			address,
@@ -50,6 +62,7 @@ export function useCounter(): UseCounterResult {
 		hasAddress: Boolean(address),
 		isConnected,
 		isInFlight: isWritePending || isConfirming,
+		error: writeError ?? receiptError ?? undefined,
 		increment,
 	};
 }

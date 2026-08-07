@@ -1,8 +1,9 @@
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useCounter } from "@/lib/web3/use-counter";
 
 export default function CounterCardLive() {
-	const { value, isLoading, hasAddress, isConnected, isInFlight, increment } = useCounter();
+	const { value, isLoading, hasAddress, isConnected, isInFlight, error, increment } = useCounter();
 
 	if (!hasAddress) {
 		return <div className="text-muted-foreground">Counter not deployed on this chain</div>;
@@ -19,6 +20,11 @@ export default function CounterCardLive() {
 				{isInFlight ? "Confirming…" : "Increment"}
 			</Button>
 			{!isConnected && <p className="text-sm text-muted-foreground">Connect wallet to increment</p>}
+			{error && (
+				<Alert variant="destructive">
+					<AlertDescription>{error.message}</AlertDescription>
+				</Alert>
+			)}
 		</div>
 	);
 }

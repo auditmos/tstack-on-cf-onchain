@@ -48,11 +48,14 @@ beforeEach(() => {
 		writeContract: vi.fn(),
 		data: undefined,
 		isPending: false,
+		error: undefined,
 		reset: vi.fn(),
 	});
 	useWaitForTransactionReceiptMock.mockReturnValue({
 		isLoading: false,
 		isSuccess: false,
+		isError: false,
+		error: undefined,
 	});
 });
 
@@ -215,6 +218,65 @@ describe("CounterCard — refetch after confirmation", () => {
 
 		await screen.findByRole("button", { name: /increment/i });
 		expect(refetch).not.toHaveBeenCalled();
+	});
+});
+
+describe("CounterCard — transaction errors", () => {
+	it("renders a destructive alert and re-enables Increment when the wallet rejects the transaction", async () => {
+		useAccountMock.mockReturnValue({
+			address: "0xabcd1234567890abcdef1234567890abcdef0123",
+			isConnected: true,
+		});
+		useWriteContractMock.mockReturnValue({
+			writeContract: vi.fn(),
+			data: undefined,
+			isPending: false,
+			error: new Error("User rejected the request."),
+			reset: vi.fn(),
+		});
+
+		renderReady(<CounterCard />);
+
+		const alert = await screen.findByRole("alert");
+		expect(alert.textContent).toMatch(/rejected/i);
+
+		const button = screen.getByRole("button", { name: /increment/i });
+		expect(button).toHaveProperty("disabled", false);
+	});
+
+	it("renders a destructive alert and re-enables Increment when the transaction reverts on chain", async () => {
+		useAccountMock.mockReturnValue({
+			address: "0xabcd1234567890abcdef1234567890abcdef0123",
+			isConnected: true,
+		});
+		useWriteContractMock.mockReturnValue({
+			writeContract: vi.fn(),
+			data: "0xtxhash",
+			isPending: false,
+			error: undefined,
+			reset: vi.fn(),
+		});
+		useWaitForTransactionReceiptMock.mockReturnValue({
+			isLoading: false,
+			isSuccess: false,
+			isError: true,
+			error: new Error("Transaction reverted"),
+		});
+
+		renderReady(<CounterCard />);
+
+		const alert = await screen.findByRole("alert");
+		expect(alert.textContent).toMatch(/reverted/i);
+
+		const button = screen.getByRole("button", { name: /increment/i });
+		expect(button).toHaveProperty("disabled", false);
+	});
+
+	it("renders no alert when there is no error", async () => {
+		renderReady(<CounterCard />);
+
+		await screen.findByRole("button", { name: /increment/i });
+		expect(screen.queryByRole("alert")).toBeNull();
 	});
 });
 
