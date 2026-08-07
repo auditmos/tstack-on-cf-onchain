@@ -1,6 +1,7 @@
 import { getDefaultConfig } from "connectkit";
-import { createConfig, http } from "wagmi";
+import { createConfig } from "wagmi";
 import { activeChain, supportedChains } from "./chains";
+import { createRpcTransport } from "./rpc-transport";
 
 interface CreateWagmiConfigOptions {
 	walletConnectProjectId: string;
@@ -13,7 +14,7 @@ export function createWagmiConfig({
 	appName = "tstack-on-cf-onchain",
 	appUrl,
 }: CreateWagmiConfigOptions) {
-	const transports = Object.fromEntries(supportedChains.map((c) => [c.id, http()]));
+	const transports = Object.fromEntries(supportedChains.map((c) => [c.id, createRpcTransport(c)]));
 
 	return createConfig(
 		getDefaultConfig({

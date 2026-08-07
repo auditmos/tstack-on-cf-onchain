@@ -228,7 +228,17 @@ const SUPPORTED: Record<number, Chain> = {
 export const activeChain: Chain = resolveChain(Number(import.meta.env.VITE_CHAIN_ID ?? 31337));
 ```
 
-Add a chain by extending `SUPPORTED`. `createWagmiConfig` in `src/lib/web3/wagmi-config.ts` builds an `http()` transport per supported chain and pulls the WalletConnect project id from `VITE_WALLETCONNECT_PROJECT_ID`.
+Add a chain by extending `SUPPORTED`. `createWagmiConfig` in `src/lib/web3/wagmi-config.ts` builds a transport per supported chain via `createRpcTransport` and pulls the WalletConnect project id from `VITE_WALLETCONNECT_PROJECT_ID`.
+
+### RPC failover (`src/lib/web3/rpc-transport.ts`)
+
+Every chain gets a resolver-built transport instead of a bare `http()` call, so a single provider outage doesn't take the app down:
+
+- `VITE_RPC_URL_<chainId>` (e.g. `VITE_RPC_URL_1`, `VITE_RPC_URL_31337`) overrides the endpoint for that chain — tried first.
+- The chain's built-in public endpoint (from `viem/chains`) is always the last-resort fallback, so an unconfigured fork still works with no setup.
+- With more than one candidate, viem's `fallback()` wraps them in that order; with exactly one, it's a plain `http()`.
+
+These are `VITE_*` vars — browser-exposed by construction. **If server-side chain access is ever added, that endpoint must become a Worker secret (`wrangler secret put`), never a client-visible variable** — see `.claude/rules/frontend/web3-ssr.md`.
 
 ### Generated contract bindings (`src/contracts/`)
 
