@@ -1,3 +1,10 @@
+## [1.7.8](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.7...v1.7.8) (2026-08-07)
+
+
+### Bug Fixes
+
+* **contracts:** pin toolchain, compiler, and EVM target for reproducible builds ([4c02960](https://github.com/auditmos/tstack-on-cf-onchain/commit/4c029607a1bbdb7c8a931097e50b254dcded9a56)), closes [#44](https://github.com/auditmos/tstack-on-cf-onchain/issues/44)
+
 ## [1.7.7](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.7.6...v1.7.7) (2026-08-07)
 
 
