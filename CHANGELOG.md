@@ -1,3 +1,11 @@
+# [1.10.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.9.0...v1.10.0) (2026-08-08)
+
+
+### Features
+
+* **cf:** declare production routing posture, document versioned-deploy runbook ([ffe1a26](https://github.com/auditmos/tstack-on-cf-onchain/commit/ffe1a26411f8bc6c59319300012bae04e4055595)), closes [#49](https://github.com/auditmos/tstack-on-cf-onchain/issues/49) [#52](https://github.com/auditmos/tstack-on-cf-onchain/issues/52)
+* **docs:** unify agent instructions, seed docs/, make compat-date bump the single writer ([d5b0480](https://github.com/auditmos/tstack-on-cf-onchain/commit/d5b0480ad6c7a4d34ecb3fe279d46eb8af19db00)), closes [#49](https://github.com/auditmos/tstack-on-cf-onchain/issues/49)
+
 # [1.9.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.8.1...v1.9.0) (2026-08-07)
 
 
