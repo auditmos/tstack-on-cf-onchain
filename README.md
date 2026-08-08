@@ -375,6 +375,25 @@ Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.
 - Prefer `custom_domain: true` over routes with `zone_name` — see `.claude/rules/cloudflare-deployment.md`.
 - Run `pnpm cf-typegen` whenever you add bindings to regenerate `worker-configuration.d.ts`.
 
+### API Middleware Chain & the Rate Limiting Binding
+
+`src/hono/api.ts` attaches three middleware stages once, where `apiHono` is constructed — not per-route — so every current and future endpoint under `/api/*` inherits them and none can opt out by omission: **requestId** (propagates a caller-supplied `X-Request-Id` or generates one, correlating every response — success or error — to its structured error log line) → **error handling** (`apiHono.onError`, already wrapping the chain) → **cors** (origin allowlist read from `ALLOWED_ORIGINS` per environment) → **rate limiting**. There is no authentication stage — it's a fork-supplied extension point; add your own at this same construction point.
+
+The rate limiter is this template's first Cloudflare binding, and doubles as the worked example for declaring one:
+
+```jsonc
+// wrangler.jsonc — top level, then re-declared in every env.* block (env-level
+// config does NOT inherit from top level on this platform):
+"ratelimits": [
+  { "name": "API_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 100, "period": 60 } }
+]
+```
+
+- `name` is the binding key Wrangler exposes on `env` — `pnpm cf-typegen` picks it up automatically, typed as the ambient `RateLimit` interface.
+- `namespace_id` is an arbitrary identifier **you pick** to scope counters within a script — unlike KV/D1/R2, there's no `wrangler` resource-creation step first.
+- `simple.limit` / `simple.period` are requests-per-window (100 req / 60s above); tune per environment.
+- Consumed in `src/hono/middleware/rate-limit.ts`: `await c.env.API_RATE_LIMITER.limit({ key })`, keyed on the caller's IP, returning 429 before the request reaches a handler when exceeded.
+
 ### Production Routing Posture
 
 `env.production` in `wrangler.jsonc` declares its reachability explicitly instead of relying on Cloudflare's silent defaults:

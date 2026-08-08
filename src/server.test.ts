@@ -16,6 +16,8 @@ const ctxStub = {
 function buildEnv(overrides: Partial<Env> = {}): Env {
 	return {
 		CLOUDFLARE_ENV: "dev",
+		ALLOWED_ORIGINS: "http://localhost:3000",
+		API_RATE_LIMITER: { limit: async () => ({ success: true }) },
 		DATABASE_HOST: "h",
 		DATABASE_USERNAME: "u",
 		DATABASE_PASSWORD: "p",

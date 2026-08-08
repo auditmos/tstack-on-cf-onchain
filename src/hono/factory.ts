@@ -1,3 +1,4 @@
 import { Hono } from "hono";
 
-export const createHono = () => new Hono<{ Bindings: Env }>();
+export const createHono = <Variables extends object = object>() =>
+	new Hono<{ Bindings: Env; Variables: Variables }>();

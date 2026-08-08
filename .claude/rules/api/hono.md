@@ -19,15 +19,26 @@ export default {
 
 ## Middleware Chain
 
-Apply in order: requestId → errorHandler → cors → auth → rateLimiter → validator
+Three stages are implemented, attached once where `apiHono` is constructed
+(`src/hono/api.ts`) — not per-route — so every current and future endpoint
+inherits them and none can opt out by omission. Order: requestId →
+errorHandler → cors → rateLimiter.
 
 ```ts
-app.use('*', requestId())
-app.use('*', errorHandler())
-app.use('*', cors())
-app.use('/api/*', authMiddleware())
-app.use('/api/*', rateLimiter())
+apiHono.use('*', requestId())      // hono/request-id — propagates a caller-supplied
+                                    // X-Request-Id or generates one; c.get('requestId')
+apiHono.use('*', apiCors())        // src/hono/middleware/cors.ts — origin allowlist from
+                                    // the ALLOWED_ORIGINS env var, read per-request
+apiHono.use('*', rateLimiter())    // src/hono/middleware/rate-limit.ts — the
+                                    // API_RATE_LIMITER binding, 429 before reaching a handler
+apiHono.onError((err, c) => { ... }) // wraps everything above; logs c.get('requestId')
+                                      // alongside the error so a response correlates to its log line
 ```
+
+**Authentication is a fork-supplied extension point, not implemented here.**
+This template deliberately ships with no auth story — add your own stage
+(session cookie, JWT, API key, etc.) at this same construction point when
+your fork needs one.
 
 ## Route Structure
 

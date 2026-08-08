@@ -13,7 +13,10 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"main": "./src/server.ts",
 	"vars": {
-		"CLOUDFLARE_ENV": "dev"
+		"CLOUDFLARE_ENV": "dev",
+		// Comma-separated list of origins the API's CORS middleware allows. Dev talks to
+		// the local Vite dev server on the same default port.
+		"ALLOWED_ORIGINS": "http://localhost:3000"
 	},
 	// Stack traces point at original source instead of an offset into the minified bundle.
 	"upload_source_maps": true,
@@ -22,11 +25,23 @@
 		// Dev is low-traffic and actively debugged — log everything.
 		"logs": { "head_sampling_rate": 1 }
 	},
+	// Rate Limiting binding for the API middleware chain (src/hono/middleware/rate-limit.ts) —
+	// this repo's first Cloudflare binding, and its worked example: `name` is the binding key
+	// exposed on `env`, `namespace_id` is an arbitrary local identifier you pick (not a
+	// provisioned resource id — no `wrangler` create step needed), and `simple.limit`/`period`
+	// are requests-per-window. Because env-level config does NOT inherit from top level on this
+	// platform, this binding must be re-declared in every `env.*` block below, or that
+	// environment's Worker throws at request time the first time rate limiting runs.
+	"ratelimits": [
+		{ "name": "API_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 100, "period": 60 } }
+	],
 	"env": {
 		"staging": {
 			"name": "tanstack-start-app-staging",
 			"vars": {
-				"CLOUDFLARE_ENV": "staging"
+				"CLOUDFLARE_ENV": "staging",
+				// Set this to your staging frontend's origin once you have one deployed.
+				"ALLOWED_ORIGINS": ""
 			},
 			"upload_source_maps": true,
 			// Runs near the single-region Neon database it round-trips to on every request.
@@ -35,12 +50,22 @@
 				"enabled": true,
 				// Staging has staging-sized traffic and exists to catch bugs before prod — log everything.
 				"logs": { "head_sampling_rate": 1 }
-			}
+			},
+			// Re-declared: env-level bindings are NOT inherited from top level — see the note above.
+			"ratelimits": [
+				{
+					"name": "API_RATE_LIMITER",
+					"namespace_id": "1001",
+					"simple": { "limit": 100, "period": 60 }
+				}
+			]
 		},
 		"production": {
 			"name": "tanstack-start-app-production",
 			"vars": {
-				"CLOUDFLARE_ENV": "production"
+				"CLOUDFLARE_ENV": "production",
+				// Set this to your production frontend's origin(s) once you go live.
+				"ALLOWED_ORIGINS": ""
 			},
 			"upload_source_maps": true,
 			// Runs near the single-region Neon database it round-trips to on every request.
@@ -51,6 +76,14 @@
 				// error-rate and latency trends without paying to log every request.
 				"logs": { "head_sampling_rate": 0.1 }
 			},
+			// Re-declared: env-level bindings are NOT inherited from top level — see the note above.
+			"ratelimits": [
+				{
+					"name": "API_RATE_LIMITER",
+					"namespace_id": "1001",
+					"simple": { "limit": 100, "period": 60 }
+				}
+			],
 			// Reachable at tanstack-start-app-production.<subdomain>.workers.dev until a
 			// custom domain is attached below. Safe default for a template repo: every
 			// fork deploys successfully with zero DNS setup. Set to false once the

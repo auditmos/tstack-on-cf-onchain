@@ -13,6 +13,7 @@ vi.mock("@/db/client", async () => {
 });
 
 import { apiHono } from "@/hono/api";
+import { PERMISSIVE_TEST_ENV } from "@/hono/test-env";
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -20,11 +21,15 @@ beforeEach(() => {
 
 describe("apiHono validation — error response shape", () => {
 	it("POST /api/clients with empty body returns 400 with { error, details }", async () => {
-		const res = await apiHono.request("/api/clients", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({}),
-		});
+		const res = await apiHono.request(
+			"/api/clients",
+			{
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({}),
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as { error: string; details: unknown };
@@ -33,11 +38,15 @@ describe("apiHono validation — error response shape", () => {
 	});
 
 	it("PUT /api/clients/:id with non-uuid param returns 400 same shape", async () => {
-		const res = await apiHono.request("/api/clients/not-a-uuid", {
-			method: "PUT",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ email: "new@example.com" }),
-		});
+		const res = await apiHono.request(
+			"/api/clients/not-a-uuid",
+			{
+				method: "PUT",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ email: "new@example.com" }),
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as { error: string; details: unknown };
@@ -46,11 +55,15 @@ describe("apiHono validation — error response shape", () => {
 	});
 
 	it("PUT with empty body returns 400 same shape", async () => {
-		const res = await apiHono.request("/api/clients/11111111-1111-4111-8111-111111111111", {
-			method: "PUT",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({}),
-		});
+		const res = await apiHono.request(
+			"/api/clients/11111111-1111-4111-8111-111111111111",
+			{
+				method: "PUT",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({}),
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as { error: string; details: unknown };
@@ -59,9 +72,13 @@ describe("apiHono validation — error response shape", () => {
 	});
 
 	it("DELETE /api/clients/:id with non-uuid param returns 400 same shape", async () => {
-		const res = await apiHono.request("/api/clients/not-a-uuid", {
-			method: "DELETE",
-		});
+		const res = await apiHono.request(
+			"/api/clients/not-a-uuid",
+			{
+				method: "DELETE",
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as { error: string; details: unknown };
@@ -70,7 +87,7 @@ describe("apiHono validation — error response shape", () => {
 	});
 
 	it("GET /api/clients with non-numeric limit returns 400 same shape", async () => {
-		const res = await apiHono.request("/api/clients?limit=abc");
+		const res = await apiHono.request("/api/clients?limit=abc", {}, PERMISSIVE_TEST_ENV);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as { error: string; details: unknown };
@@ -79,7 +96,7 @@ describe("apiHono validation — error response shape", () => {
 	});
 
 	it("GET /api/clients/:id with non-uuid param returns 400 same shape", async () => {
-		const res = await apiHono.request("/api/clients/not-a-uuid");
+		const res = await apiHono.request("/api/clients/not-a-uuid", {}, PERMISSIVE_TEST_ENV);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as { error: string; details: unknown };
@@ -88,11 +105,15 @@ describe("apiHono validation — error response shape", () => {
 	});
 
 	it("POST surfaces per-field errors via details.fieldErrors", async () => {
-		const res = await apiHono.request("/api/clients", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ name: "", surname: "", email: "not-an-email" }),
-		});
+		const res = await apiHono.request(
+			"/api/clients",
+			{
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ name: "", surname: "", email: "not-an-email" }),
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as {

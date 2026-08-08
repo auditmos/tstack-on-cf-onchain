@@ -15,6 +15,7 @@ vi.mock("@/db/client", async () => {
 import type { Client } from "@/db/client";
 import { createClient, deleteClient, getClient, getClients, updateClient } from "@/db/client";
 import { apiHono } from "@/hono/api";
+import { PERMISSIVE_TEST_ENV } from "@/hono/test-env";
 
 const sampleClient: Client = {
 	id: "11111111-1111-4111-8111-111111111111",
@@ -34,7 +35,7 @@ describe("apiHono response envelopes — { data } / { data, meta }", () => {
 			meta: { total: 1, limit: 10, offset: 0, hasMore: false },
 		});
 
-		const res = await apiHono.request("/api/clients");
+		const res = await apiHono.request("/api/clients", {}, PERMISSIVE_TEST_ENV);
 
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as {
@@ -51,7 +52,7 @@ describe("apiHono response envelopes — { data } / { data, meta }", () => {
 	it("GET /api/clients/:id returns { data: Client }", async () => {
 		vi.mocked(getClient).mockResolvedValueOnce(sampleClient);
 
-		const res = await apiHono.request(`/api/clients/${sampleClient.id}`);
+		const res = await apiHono.request(`/api/clients/${sampleClient.id}`, {}, PERMISSIVE_TEST_ENV);
 
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { data: Client };
@@ -61,11 +62,15 @@ describe("apiHono response envelopes — { data } / { data, meta }", () => {
 	it("POST /api/clients returns { data: Client } with status 201", async () => {
 		vi.mocked(createClient).mockResolvedValueOnce(sampleClient);
 
-		const res = await apiHono.request("/api/clients", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ name: "Ada", surname: "Lovelace", email: "ada@example.com" }),
-		});
+		const res = await apiHono.request(
+			"/api/clients",
+			{
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ name: "Ada", surname: "Lovelace", email: "ada@example.com" }),
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(201);
 		const body = (await res.json()) as { data: Client };
@@ -75,11 +80,15 @@ describe("apiHono response envelopes — { data } / { data, meta }", () => {
 	it("PUT /api/clients/:id returns { data: Client }", async () => {
 		vi.mocked(updateClient).mockResolvedValueOnce(sampleClient);
 
-		const res = await apiHono.request(`/api/clients/${sampleClient.id}`, {
-			method: "PUT",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ email: "updated@example.com" }),
-		});
+		const res = await apiHono.request(
+			`/api/clients/${sampleClient.id}`,
+			{
+				method: "PUT",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ email: "updated@example.com" }),
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { data: Client };
@@ -89,9 +98,13 @@ describe("apiHono response envelopes — { data } / { data, meta }", () => {
 	it("DELETE /api/clients/:id returns { data: { id } }", async () => {
 		vi.mocked(deleteClient).mockResolvedValueOnce(true);
 
-		const res = await apiHono.request(`/api/clients/${sampleClient.id}`, {
-			method: "DELETE",
-		});
+		const res = await apiHono.request(
+			`/api/clients/${sampleClient.id}`,
+			{
+				method: "DELETE",
+			},
+			PERMISSIVE_TEST_ENV,
+		);
 
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { data: { id: string } };
