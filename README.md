@@ -361,7 +361,7 @@ Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tanstack-start-app",
-  "compatibility_date": "2025-09-02",
+  "compatibility_date": "2026-05-26",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/server.ts",
   "vars": {
