@@ -1,5 +1,5 @@
 import { anvil, mainnet, sepolia } from "viem/chains";
-import { activeChain, resolveChain, supportedChains, UnsupportedChainError } from "./chains";
+import { activeChain, knownChains, resolveChain, UnsupportedChainError } from "./chains";
 
 describe("resolveChain", () => {
 	it("returns anvil for chainId 31337", () => {
@@ -24,11 +24,19 @@ describe("activeChain", () => {
 		expect(activeChain.id).toBe(31337);
 	});
 
-	it("is included in supportedChains", () => {
-		expect(supportedChains).toContain(activeChain);
+	it("is included in knownChains", () => {
+		expect(knownChains).toContain(activeChain);
+	});
+});
+
+describe("knownChains", () => {
+	it("is the full registry of chains this template knows how to resolve — not just the active one", () => {
+		expect(knownChains).toContain(anvil);
+		expect(knownChains).toContain(sepolia);
+		expect(knownChains).toContain(mainnet);
 	});
 
-	it("supportedChains is non-empty", () => {
-		expect(supportedChains.length).toBeGreaterThan(0);
+	it("has more than one entry, unlike activeChain", () => {
+		expect(knownChains.length).toBeGreaterThan(1);
 	});
 });

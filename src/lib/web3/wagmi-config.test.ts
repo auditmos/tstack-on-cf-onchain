@@ -13,6 +13,11 @@ describe("createWagmiConfig", () => {
 		expect(config._internal.transports[activeChain.id]).toBeDefined();
 	});
 
+	it("registers a transport for activeChain only — it does not iterate a chain registry", () => {
+		const config = createWagmiConfig({ walletConnectProjectId: "test-project-id" });
+		expect(Object.keys(config._internal.transports)).toEqual([String(activeChain.id)]);
+	});
+
 	it("enables SSR mode", () => {
 		const config = createWagmiConfig({ walletConnectProjectId: "test-project-id" });
 		expect(config._internal.ssr).toBe(true);

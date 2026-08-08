@@ -5,9 +5,11 @@
 		"src/routes/**/*.{ts,tsx}",
 		"taze.config.ts",
 		"scripts/*.ts",
-		"drizzle-*.config.ts"
+		"drizzle-*.config.ts",
+		"src/db/schema.ts"
 	],
 	"ignoreDependencies": ["@tanstack/react-form", "web-vitals"],
 	"ignoreBinaries": ["forge", "anvil"],
-	"ignore": ["src/components/ui/**", "src/core/errors.ts", "src/db/**"]
+	"ignore": ["src/components/ui/**"],
+	"ignoreExportsUsedInFile": true
 }

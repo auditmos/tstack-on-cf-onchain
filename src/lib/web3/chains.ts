@@ -23,5 +23,8 @@ export function resolveChain(chainId: number): Chain {
 
 const envChainId = Number(import.meta.env.VITE_CHAIN_ID ?? 31337);
 
+/** The single chain this deployment is configured for. */
 export const activeChain: Chain = resolveChain(envChainId);
-export const supportedChains: readonly Chain[] = [activeChain] as const;
+
+/** The full registry of chains this template knows how to resolve — not just the active one. */
+export const knownChains: readonly Chain[] = Object.values(SUPPORTED);

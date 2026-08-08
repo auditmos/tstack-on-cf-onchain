@@ -12,6 +12,7 @@ export class AppError extends Error {
 	}
 }
 
+/** @public */
 export type Result<T> = { ok: true; data: T } | { ok: false; error: AppError };
 
 export function isUniqueViolation(error: unknown): boolean {

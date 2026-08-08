@@ -1,6 +1,6 @@
 import { getDefaultConfig } from "connectkit";
 import { createConfig } from "wagmi";
-import { activeChain, supportedChains } from "./chains";
+import { activeChain } from "./chains";
 import { createRpcTransport } from "./rpc-transport";
 
 interface CreateWagmiConfigOptions {
@@ -14,7 +14,7 @@ export function createWagmiConfig({
 	appName = "tstack-on-cf-onchain",
 	appUrl,
 }: CreateWagmiConfigOptions) {
-	const transports = Object.fromEntries(supportedChains.map((c) => [c.id, createRpcTransport(c)]));
+	const transports = { [activeChain.id]: createRpcTransport(activeChain) };
 
 	return createConfig(
 		getDefaultConfig({

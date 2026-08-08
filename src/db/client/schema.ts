@@ -44,13 +44,6 @@ export const PaginationMetaSchema = z.object({
 });
 export type PaginationMeta = z.infer<typeof PaginationMetaSchema>;
 
-// HTTP response envelope (Hono layer)
-export const ClientListResponseSchema = z.object({
-	data: z.array(ClientSchema),
-	meta: PaginationMetaSchema,
-});
-export type ClientListResponse = z.infer<typeof ClientListResponseSchema>;
-
 // Domain result (queries layer) — Hono wraps `items` into `data`
 export type ClientListResult = {
 	items: Client[];
@@ -60,9 +53,4 @@ export type ClientListResult = {
 // Params
 export const IdParamSchema = z.object({
 	id: z.string().uuid("Invalid ID format"),
-});
-
-// Error
-export const ErrorResponseSchema = z.object({
-	error: z.string(),
 });
