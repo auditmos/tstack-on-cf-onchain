@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.10.0...v1.11.0) (2026-08-08)
+
+
+### Features
+
+* **agents:** declare Cloudflare docs MCP server, mirror instructions for Cursor ([89fe3aa](https://github.com/auditmos/tstack-on-cf-onchain/commit/89fe3aa16cc8fcf2856ce58f0e6500475e8a8404)), closes [#53](https://github.com/auditmos/tstack-on-cf-onchain/issues/53)
+
 # [1.10.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.9.0...v1.10.0) (2026-08-08)
 
 
