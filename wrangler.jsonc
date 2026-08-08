@@ -50,7 +50,20 @@
 				// Production traffic volume makes 100% sampling costly; 10% is enough signal for
 				// error-rate and latency trends without paying to log every request.
 				"logs": { "head_sampling_rate": 0.1 }
-			}
+			},
+			// Reachable at tanstack-start-app-production.<subdomain>.workers.dev until a
+			// custom domain is attached below. Safe default for a template repo: every
+			// fork deploys successfully with zero DNS setup. Set to false once the
+			// custom_domain route below is live, if workers.dev access should stop working.
+			"workers_dev": true,
+			// Off by default: a Version's preview URL (<version>-<name>.<subdomain>.workers.dev)
+			// serves that version's code before it has been promoted to production traffic.
+			// Leaving this on would make not-yet-promoted production code publicly reachable.
+			"preview_urls": false
+			// Uncomment and set your domain to go live on a custom domain instead of (or in
+			// addition to) the workers.dev hostname above. `custom_domain: true` auto-creates
+			// the DNS record and SSL cert — see .claude/rules/cloudflare-deployment.md.
+			// "routes": [{ "pattern": "app.example.com", "custom_domain": true }]
 		}
 	}
 }

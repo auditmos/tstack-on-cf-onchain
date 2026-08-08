@@ -1,15 +1,14 @@
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
 	COMPAT_DATE_REGEX,
 	computeAction,
+	listScannableRepoFiles,
 	syncOccurrence,
 	THRESHOLD_DAYS,
 } from "./bump-compat-date";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const SCAN_EXTENSIONS = [".md", ".json", ".jsonc", ".yml", ".yaml", ".ts", ".tsx"];
 
 function readRepoFile(relativePath: string): string {
 	return readFileSync(resolve(ROOT, relativePath), "utf8");
@@ -53,14 +52,8 @@ describe("repo-wide compat-date consistency (issue #49 — single writer)", () =
 		const wranglerDate = readRepoFile("wrangler.jsonc").match(COMPAT_DATE_REGEX)?.[1];
 		expect(wranglerDate).toBeDefined();
 
-		const trackedFiles = execFileSync("git", ["ls-files"], { cwd: ROOT, encoding: "utf8" })
-			.split("\n")
-			.filter(Boolean)
-			.filter((path) => path !== "wrangler.jsonc")
-			.filter((path) => SCAN_EXTENSIONS.some((ext) => path.endsWith(ext)));
-
 		const disagreements: Array<{ path: string; found: string }> = [];
-		for (const path of trackedFiles) {
+		for (const path of listScannableRepoFiles()) {
 			const match = readFileSync(resolve(ROOT, path), "utf8").match(COMPAT_DATE_REGEX);
 			if (match?.[1] && match[1] !== wranglerDate) {
 				disagreements.push({ path, found: match[1] });

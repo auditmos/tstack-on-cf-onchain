@@ -38,13 +38,14 @@ export function syncOccurrence(src: string, targetDate: string): string | null {
 	return src.replace(COMPAT_DATE_REGEX, `"compatibility_date": "${targetDate}"`);
 }
 
-/** Every git-tracked, compat-date-scannable file other than wrangler.jsonc itself — the set of "everywhere else" the single writer must cover. */
+/** Every git-tracked, compat-date-scannable file other than wrangler.jsonc itself — the set of "everywhere else" the single writer must cover. Test files are excluded: their fixtures deliberately contain arbitrary/stale-looking date literals that are test data, not real drift. */
 export function listScannableRepoFiles(): string[] {
 	const out = execFileSync("git", ["ls-files"], { encoding: "utf8" });
 	return out
 		.split("\n")
 		.filter(Boolean)
 		.filter((path) => path !== WRANGLER_PATH)
+		.filter((path) => !path.endsWith(".test.ts") && !path.endsWith(".test.tsx"))
 		.filter((path) => SCAN_EXTENSIONS.some((ext) => path.endsWith(ext)));
 }
 

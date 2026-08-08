@@ -14,6 +14,9 @@ type WranglerEnv = {
 	};
 	upload_source_maps?: boolean;
 	placement?: { mode?: string };
+	workers_dev?: boolean;
+	preview_urls?: boolean;
+	routes?: Array<{ pattern?: string; custom_domain?: boolean }>;
 };
 
 type WranglerConfig = {
@@ -134,6 +137,32 @@ describe("wrangler.jsonc multi-env configuration", () => {
 				expect(hasCommentedOccurrence).toBe(true);
 			});
 		}
+	});
+});
+
+describe("production routing posture (issue #52)", () => {
+	const config = readWranglerConfig();
+	const envs = config.env ?? {};
+	const source = readWranglerSource();
+
+	it("declares env.production's default-hostname (workers_dev) posture explicitly, not by omission", () => {
+		expect(envs.production?.workers_dev).toBe(true);
+	});
+
+	it("declares env.production's preview-URL exposure explicitly, not by omission", () => {
+		expect(envs.production?.preview_urls).toBe(false);
+	});
+
+	it("ships a commented custom_domain routes stanza so going live is an uncomment away", () => {
+		const commentedRoutesLine = source
+			.split("\n")
+			.find((line) => line.trim().startsWith("//") && line.includes('"custom_domain": true'));
+		expect(commentedRoutesLine).toBeDefined();
+		expect(commentedRoutesLine).toMatch(/"pattern":\s*"[^"]+\.[^"]+"/);
+	});
+
+	it("does not silently declare a real routes stanza for a template repo (routes stay commented, not live)", () => {
+		expect(envs.production?.routes).toBeUndefined();
 	});
 });
 

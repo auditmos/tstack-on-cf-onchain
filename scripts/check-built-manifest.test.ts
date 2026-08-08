@@ -12,6 +12,9 @@ type BuiltManifest = {
 	upload_source_maps?: boolean;
 	placement?: { mode?: string };
 	observability?: { logs?: { head_sampling_rate?: number } };
+	workers_dev?: boolean;
+	preview_urls?: boolean;
+	routes?: unknown;
 };
 
 describe("dist/server/wrangler.json built manifest", () => {
@@ -36,6 +39,22 @@ describe("dist/server/wrangler.json built manifest", () => {
 	if (manifest.targetEnvironment === "staging" || manifest.targetEnvironment === "production") {
 		it(`carries placement.mode="smart" into the built manifest for env.${manifest.targetEnvironment}`, () => {
 			expect(manifest.placement?.mode).toBe("smart");
+		});
+	}
+
+	// Issue #52: default-hostname posture and preview-URL exposure must be explicit
+	// in the built manifest for env.production, not just present in wrangler.jsonc source.
+	if (manifest.targetEnvironment === "production") {
+		it("carries workers_dev=true into the built manifest for env.production", () => {
+			expect(manifest.workers_dev).toBe(true);
+		});
+
+		it("carries preview_urls=false into the built manifest for env.production", () => {
+			expect(manifest.preview_urls).toBe(false);
+		});
+
+		it("carries no live routes stanza into the built manifest (custom domain stays commented)", () => {
+			expect(manifest.routes).toBeUndefined();
 		});
 	}
 });

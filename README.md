@@ -375,6 +375,47 @@ Run `pnpm contracts:typegen` after a deploy to refresh `src/contracts/addresses.
 - Prefer `custom_domain: true` over routes with `zone_name` — see `.claude/rules/cloudflare-deployment.md`.
 - Run `pnpm cf-typegen` whenever you add bindings to regenerate `worker-configuration.d.ts`.
 
+### Production Routing Posture
+
+`env.production` in `wrangler.jsonc` declares its reachability explicitly instead of relying on Cloudflare's silent defaults:
+
+- **`workers_dev: true`** — production is reachable at `tanstack-start-app-production.<subdomain>.workers.dev` out of the box. Every fork deploys successfully with zero DNS setup; this is the template-safe default. Flip to `false` once the custom domain below is live, if `workers.dev` access should stop working.
+- **`preview_urls: false`** — a Worker Version's preview URL (`<version>-<name>.<subdomain>.workers.dev`) serves that version's code before it has been promoted to production traffic. Off by default so not-yet-promoted code isn't publicly reachable.
+- **Custom domain** — a correct, commented `routes` stanza sits right below those two fields:
+  ```jsonc
+  // "routes": [{ "pattern": "app.example.com", "custom_domain": true }]
+  ```
+  Going live on your own domain is an uncomment (and setting your real hostname), not a documentation search. `custom_domain: true` auto-creates the DNS record and SSL cert — see `.claude/rules/cloudflare-deployment.md`.
+
+### Versioned Deploys: Upload, Gradual Rollout & Rollback
+
+The recommended production practice is **upload, then split traffic, then promote** — not an all-at-once `wrangler deploy`. No script wraps this; it's a deliberate, manual, one-Worker-Version-at-a-time decision, and it's one documented command away for the forks that want it:
+
+```bash
+# 1. Build for the target env, then upload the build as a new immutable Version.
+#    This does NOT route any traffic yet — --env is not needed here because the
+#    just-run env-scoped build already redirected wrangler at dist/server/wrangler.json.
+pnpm run build:production
+wrangler versions upload --message "describe what changed"
+# → prints a Version ID
+
+# 2. Gradually split production traffic between the new and previous Version.
+#    versions/rollback commands are NOT preceded by a fresh env-scoped build, so
+#    they need an explicit --env to target the right Worker script.
+wrangler versions deploy <new-version-id>@10 --env production
+# watch error rates / logs, then ramp up:
+wrangler versions deploy <new-version-id>@50 --env production
+wrangler versions deploy <new-version-id>@100 --env production   # fully promoted
+
+# 3. Something's wrong? Roll back instantly to the last-known-good Version.
+wrangler rollback --env production --message "why you're rolling back"
+# or roll back to a specific Version:
+wrangler versions list --env production
+wrangler rollback <previous-version-id> --env production
+```
+
+`wrangler deploy` (the one-shot version `pnpm deploy:production` runs) is still the simpler path for low-traffic changes — it uploads and promotes a Version to 100% in one step. Reach for the gradual-rollout sequence above for anything you'd want to watch before it reaches every user.
+
 ### Custom Server Entry (`src/server.ts`)
 
 One fetch handler owns the entire worker. It delegates the DB-secrets/routing decision to `admitRequest()` (`src/core/request-admission.ts`) and dispatches to Hono or TanStack Start.
@@ -433,9 +474,13 @@ Equivalently via Dashboard: *Workers & Pages → your worker → Settings → Va
 
 Vite-side variables (`VITE_*`) belong in `.env` / `.env.<mode>` because they're inlined into the browser bundle — they're public by construction, so never put secrets there.
 
+**Why per-Worker secrets over account-level Secrets Store**: this template uses `wrangler secret put --env <env>`, which scopes each secret to one Worker script. Cloudflare's account-level Secrets Store instead scopes a secret to the account and lets multiple Workers bind to the same value. Per-Worker secrets keep the blast radius of a leaked or misconfigured value to a single environment — staging can't accidentally read production's `DATABASE_PASSWORD` — at the cost of re-entering the same value per environment. That trade-off suits this template's three isolated environments (dev/staging/production, each with its own database); a fork that fans a secret out across many Workers, or wants centralized rotation, should evaluate Secrets Store instead.
+
 ## Database (Neon + Drizzle)
 
 The DB layer is **optional** — leave `DATABASE_HOST` empty and the worker skips initialization. When you do need persistence, the DB module follows the **deep-modules** pattern: every domain has its own folder with a narrow public API.
+
+**Why the Neon HTTP driver over a connection-pooling binding (e.g. Hyperdrive)**: `drizzle-orm/neon-http` issues each query as a stateless HTTPS request — no connection to hold open, nothing to pool, and no TCP support required from the runtime. That matches this Worker's request shape: one or two queries per request, no long-lived sessions or transactions spanning multiple round trips. Hyperdrive's value is pooling and edge-caching *TCP* Postgres connections so a high-frequency, connection-heavy Worker doesn't exhaust the origin database's connection limit; at this project's query volume that overhead isn't worth the extra binding and origin-database TCP exposure it requires. A fork with substantially higher request volume, or that needs multi-statement transactions, should evaluate Hyperdrive (or Neon's own pooler endpoint, already used via `DATABASE_HOST`) instead.
 
 ```
 src/db/client/
