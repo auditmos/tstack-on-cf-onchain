@@ -1,14 +1,13 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"entry": [
-		"src/start.tsx",
 		"src/routes/**/*.{ts,tsx}",
 		"taze.config.ts",
 		"scripts/*.ts",
 		"drizzle-*.config.ts",
 		"src/db/schema.ts"
 	],
-	"ignoreDependencies": ["@tanstack/react-form", "web-vitals"],
+	"ignoreDependencies": ["@tanstack/react-form"],
 	"ignoreBinaries": ["forge", "anvil"],
 	"ignore": ["src/components/ui/**"],
 	"ignoreExportsUsedInFile": true

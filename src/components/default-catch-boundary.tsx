@@ -19,8 +19,9 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
 	console.error(error);
 
 	// Format error details for display
-	const errorMessage = error?.message || "An unexpected error occurred";
-	const errorStack = error?.stack || "";
+	// Router types boundary errors as `unknown` — anything can be thrown
+	const errorMessage = (error instanceof Error && error.message) || "An unexpected error occurred";
+	const errorStack = (error instanceof Error && error.stack) || "";
 	const hasStack = errorStack.length > 0;
 
 	const handleReportError = () => {
