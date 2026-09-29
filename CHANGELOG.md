@@ -1,3 +1,15 @@
+# [1.12.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.11.0...v1.12.0) (2026-09-29)
+
+
+### Bug Fixes
+
+* **web3:** distinct chain-registry naming, narrow dead-code exemptions ([c90d8fc](https://github.com/auditmos/tstack-on-cf-onchain/commit/c90d8fcd6d8486d962d072fc5eb7178dd1f6e6a8)), closes [#54](https://github.com/auditmos/tstack-on-cf-onchain/issues/54)
+
+
+### Features
+
+* **api:** attach requestId/CORS/rate-limit middleware at the Hono factory ([e0b037b](https://github.com/auditmos/tstack-on-cf-onchain/commit/e0b037b53a6cd192283897b3b2c093d23302c3db)), closes [#56](https://github.com/auditmos/tstack-on-cf-onchain/issues/56)
+
 # [1.11.0](https://github.com/auditmos/tstack-on-cf-onchain/compare/v1.10.0...v1.11.0) (2026-08-08)
 
 
