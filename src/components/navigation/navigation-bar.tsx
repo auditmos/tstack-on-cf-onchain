@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, Github, Menu } from "lucide-react";
+import { ExternalLink, Menu } from "lucide-react";
 import * as React from "react";
+import { GithubIcon } from "@/components/icons/github-icon";
 import { ThemeToggle } from "@/components/theme";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,7 +102,7 @@ export function NavigationBar() {
 									>
 										<span>{item.label}</span>
 										{item.label === "GitHub" ? (
-											<Github className="h-4 w-4" />
+											<GithubIcon className="h-4 w-4" />
 										) : (
 											<ExternalLink className="h-4 w-4" />
 										)}
@@ -170,7 +171,7 @@ export function NavigationBar() {
 												>
 													<span>{item.label}</span>
 													{item.label === "GitHub" ? (
-														<Github className="h-4 w-4" />
+														<GithubIcon className="h-4 w-4" />
 													) : (
 														<ExternalLink className="h-4 w-4" />
 													)}

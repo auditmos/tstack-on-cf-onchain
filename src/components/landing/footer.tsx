@@ -1,4 +1,5 @@
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { GithubIcon } from "@/components/icons/github-icon";
 
 const navigation = {
 	main: [
@@ -17,7 +18,7 @@ const navigation = {
 		{
 			name: "GitHub",
 			href: "https://github.com/tanstack",
-			icon: Github,
+			icon: GithubIcon,
 		},
 	],
 };

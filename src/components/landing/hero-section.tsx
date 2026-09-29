@@ -1,4 +1,5 @@
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { GithubIcon } from "@/components/icons/github-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -36,7 +37,7 @@ export function HeroSection() {
 							rel="noopener noreferrer"
 							className="inline-flex items-center"
 						>
-							<Github className="mr-2 h-4 w-4" />
+							<GithubIcon className="mr-2 h-4 w-4" />
 							View on GitHub
 						</a>
 					</Button>
